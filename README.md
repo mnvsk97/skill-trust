@@ -54,12 +54,11 @@ skill-check lint ./my-skill --format json
 
 Publishes are handled by GitHub Actions.
 
-1. Use Node 20 locally with `nvm use`.
+1. Use Node 22+ locally (`nvm use 22`).
 2. Bump the version in `package.json` using `npm version patch|minor|major`.
 3. Push the commit and tag with `git push origin main --follow-tags`.
-4. Add the `NPM_TOKEN` repository secret in GitHub before the first release.
 
-The publish workflow runs on `v*` tags, rebuilds the package, runs tests, verifies `npm pack --dry-run`, and then publishes to npm.
+The publish workflow runs on `v*` tags, rebuilds the package, runs tests, verifies `npm pack --dry-run`, and then publishes to npm. The `NPM_TOKEN` repository secret must be configured in GitHub before the first release.
 
 ## Commands
 

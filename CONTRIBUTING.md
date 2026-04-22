@@ -32,7 +32,7 @@ skill-check/
 ## Development setup
 
 ```bash
-git clone https://github.com/<org>/skill-check
+git clone https://github.com/mnvsk97/skill-check
 cd skill-check
 npm install
 npm run build      # compile TypeScript
