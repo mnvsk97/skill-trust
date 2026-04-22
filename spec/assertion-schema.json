@@ -1,0 +1,448 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill-check.dev/schemas/assertion/v0.1.json",
+  "title": "skill-check test suite",
+  "description": "YAML assertion spec for validating normalized traces against expectations.",
+  "type": "object",
+  "required": ["version", "suite", "tests"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "0.1",
+      "description": "Spec version."
+    },
+    "suite": {
+      "type": "string",
+      "description": "Human-readable suite name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description of the test suite."
+    },
+
+    "defaults": {
+      "type": "object",
+      "description": "Default values inherited by all tests unless overridden.",
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "type": "string",
+          "description": "Default agent name (for record mode)."
+        },
+        "model": {
+          "type": "string",
+          "description": "Default model (for record mode)."
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Default timeout per test in milliseconds."
+        },
+        "min_confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "Default minimum event confidence for assertions to apply."
+        },
+        "max_turns": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 20,
+          "description": "Maximum tester↔target turns before the test is terminated with outcome.error."
+        },
+        "max_budget_usd": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Maximum API spend per test case in USD. Applied to both tester and target agents."
+        },
+        "eval_runs": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3,
+          "description": "How many times each eval test case is run. Results are aggregated into a pass rate."
+        },
+        "min_pass_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.9,
+          "description": "Fraction of eval runs that must pass for the test to pass."
+        }
+      }
+    },
+
+    "skills": {
+      "type": "object",
+      "description": "Skills under test.",
+      "additionalProperties": false,
+      "properties": {
+        "under_test": {
+          "$ref": "#/$defs/skill_declaration"
+        }
+      }
+    },
+
+    "fixtures": {
+      "type": "array",
+      "description": "Named workspace fixtures available to tests.",
+      "items": { "$ref": "#/$defs/fixture" }
+    },
+
+    "tests": {
+      "type": "array",
+      "description": "Ordered list of test cases.",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/test_case" }
+    }
+  },
+
+  "$defs": {
+    "skill_declaration": {
+      "type": "object",
+      "required": ["source"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Skill source (e.g. 'github:org/repo', local path)."
+        },
+        "install": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "method": { "type": "string" },
+            "command": { "type": "string" }
+          }
+        },
+        "expected": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "skill_names": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Skill names expected to be available after install."
+            }
+          }
+        }
+      }
+    },
+
+    "fixture": {
+      "type": "object",
+      "required": ["id", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Fixture identifier, referenced by tests."
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to fixture directory (relative to suite file). Copied fresh per test case."
+        },
+        "user_home": {
+          "type": "string",
+          "description": "Optional path to a directory mounted as ~/.claude/ in the container. Omit for a clean new-user environment (empty ~/.claude/). Provide a pre-seeded directory for existing-user scenarios."
+        }
+      }
+    },
+
+    "tester_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "persona": {
+          "type": "string",
+          "description": "Natural language description of the user persona appended to the tester agent's system prompt. E.g. 'junior developer, first deployment, does not know the workspace name'."
+        },
+        "model": {
+          "type": "string",
+          "description": "Model for the tester agent. Defaults to haiku (cheap — tester just needs to hold a conversation)."
+        }
+      }
+    },
+
+    "test_case": {
+      "type": "object",
+      "required": ["id", "kind", "expect"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique test identifier."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["install", "activation", "negative_activation", "end_to_end"],
+          "description": "Test kind determines which assertions are valid."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable test description."
+        },
+        "prompt": {
+          "type": ["string", "null"],
+          "description": "Natural language prompt to send to the agent. Null for install tests."
+        },
+        "workspace_fixture": {
+          "type": "string",
+          "description": "Fixture ID to use as the working directory."
+        },
+        "trace": {
+          "type": "string",
+          "description": "Path to a pre-recorded trace file (for assert/replay modes)."
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Override default timeout for this test."
+        },
+        "max_turns": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Override default max tester↔target turns for this test."
+        },
+        "max_budget_usd": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Override default max API spend for this test."
+        },
+        "min_pass_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Override default minimum eval pass rate for this test."
+        },
+        "tester": {
+          "$ref": "#/$defs/tester_config",
+          "description": "Tester agent configuration. Omit for minimal (seed prompt only)."
+        },
+        "expect": {
+          "$ref": "#/$defs/expectations"
+        }
+      }
+    },
+
+    "expectations": {
+      "type": "object",
+      "description": "All assertion blocks for a test case.",
+      "additionalProperties": false,
+      "properties": {
+        "lifecycle": {
+          "$ref": "#/$defs/lifecycle_assertions"
+        },
+        "skills": {
+          "$ref": "#/$defs/skill_assertions"
+        },
+        "hooks": {
+          "$ref": "#/$defs/hook_assertions"
+        },
+        "tools": {
+          "$ref": "#/$defs/named_assertions"
+        },
+        "commands": {
+          "$ref": "#/$defs/named_assertions"
+        },
+        "files": {
+          "$ref": "#/$defs/file_assertions"
+        },
+        "api": {
+          "$ref": "#/$defs/api_assertions"
+        },
+        "outcome": {
+          "$ref": "#/$defs/outcome_assertions"
+        }
+      }
+    },
+
+    "lifecycle_assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "install": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "exit_code": { "type": "integer" }
+          }
+        }
+      }
+    },
+
+    "skill_assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "discovered": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Skills that must appear as skill.discovered events."
+        },
+        "matched": {
+          "$ref": "#/$defs/required_forbidden_list",
+          "description": "Skills that must (or must not) appear as skill.matched events. Matching is inferred evidence and is emitted at medium confidence. It does not satisfy required assertions unless the effective min_confidence is explicitly set to medium or lower."
+        },
+        "activated": {
+          "$ref": "#/$defs/required_forbidden_list",
+          "description": "Skills that must (or must not) appear as skill.activated events. Activation is inferred from SKILL.md read events and is emitted at medium confidence. It does not satisfy required assertions unless the effective min_confidence is explicitly set to medium or lower. Use hooks/commands as the primary gate for negative activation tests."
+        },
+        "order": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Relative activation order constraints as 'skill_a -> skill_b' strings. Ordering is evaluated over successful activation evidence only and treats activations as advisory unless min_confidence is explicitly lowered."
+        }
+      }
+    },
+
+    "hook_assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/named_assertion_item" },
+          "description": "Hooks that must appear (as hook.started + hook.succeeded)."
+        },
+        "forbidden": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Hook names that must NOT appear."
+        },
+        "order": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Order constraints as 'a -> b -> c' strings. Each string defines a chain that must hold in the trace."
+        }
+      }
+    },
+
+    "named_assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/named_assertion_item" },
+          "description": "Names that must appear in the trace. Each item is a name string or an object with name + min_confidence."
+        },
+        "forbidden": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Names that must NOT appear in the trace."
+        }
+      }
+    },
+
+    "named_assertion_item": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "min_confidence": {
+              "type": "string",
+              "enum": ["high", "medium", "low"]
+            }
+          }
+        }
+      ],
+      "description": "Either a plain hook name string or an object with name + confidence requirement."
+    },
+
+    "required_forbidden_list": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "forbidden": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "file_assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "created": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Relative file paths that must have file.created events in the trace."
+        },
+        "modified": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Relative file paths that must have file.modified events in the trace."
+        },
+        "deleted": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Relative file paths that must have file.deleted events in the trace."
+        },
+        "not_created": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Relative file paths that must NOT have file.created events in the trace."
+        }
+      }
+    },
+
+    "api_assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string", "description": "Logical API operation name." },
+              "method": { "type": "string" },
+              "status": { "type": "integer" }
+            }
+          }
+        },
+        "forbidden": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "outcome_assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["pass", "fail", "error", "timeout"],
+          "description": "Hard gate. CI fails if the final outcome status does not match."
+        },
+        "data": {
+          "type": "object",
+          "description": "Hard gate. Match against structured fields in the outcome event's data payload.",
+          "additionalProperties": true
+        },
+        "contains": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Soft check only. Produces warnings, never CI failures."
+        },
+        "not_contains": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Soft check only. Produces warnings, never CI failures."
+        }
+      }
+    }
+  }
+}

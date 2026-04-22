@@ -1,0 +1,58 @@
+{
+  "name": "@mnvsk97/skill-check",
+  "version": "0.1.0",
+  "description": "Skill contract testing framework for the agentskills.io ecosystem",
+  "license": "MIT",
+  "type": "module",
+  "bin": "dist/cli.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mnvsk97/skill-check.git"
+  },
+  "homepage": "https://github.com/mnvsk97/skill-check#readme",
+  "bugs": {
+    "url": "https://github.com/mnvsk97/skill-check/issues"
+  },
+  "keywords": [
+    "agents",
+    "skills",
+    "lint",
+    "cli",
+    "security",
+    "testing"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "lint:self": "eslint src",
+    "prepack": "npm run build",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "js-yaml": "^4.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.14.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.5",
+    "tsx": "^4.15.7",
+    "typescript": "^5.5.0"
+  }
+}

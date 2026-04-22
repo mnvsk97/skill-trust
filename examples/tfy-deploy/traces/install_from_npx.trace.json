@@ -1,0 +1,62 @@
+{
+  "version": "0.1",
+  "run_id": "run_install_001",
+  "agent": "codex",
+  "model": "gpt-5.4",
+  "started_at": "2026-04-20T10:00:00.000Z",
+  "ended_at": "2026-04-20T10:00:03.100Z",
+  "duration_ms": 3100,
+  "metadata": {
+    "ci_job": "skill-check-ci-42",
+    "git_sha": "abc1234"
+  },
+  "events": [
+    {
+      "id": "e1",
+      "type": "lifecycle.install.started",
+      "name": "npx skills add truefoundry/tfy-deploy-skills",
+      "ts": "2026-04-20T10:00:00.000Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e2",
+      "type": "lifecycle.install.succeeded",
+      "name": "npx skills add truefoundry/tfy-deploy-skills",
+      "ts": "2026-04-20T10:00:02.800Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {
+        "exit_code": 0
+      }
+    },
+    {
+      "id": "e3",
+      "type": "skill.discovered",
+      "name": "tfy-deploy",
+      "ts": "2026-04-20T10:00:02.900Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e4",
+      "type": "skill.discovered",
+      "name": "tfy-logs",
+      "ts": "2026-04-20T10:00:02.950Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e5",
+      "type": "skill.discovered",
+      "name": "tfy-status",
+      "ts": "2026-04-20T10:00:03.000Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    }
+  ]
+}

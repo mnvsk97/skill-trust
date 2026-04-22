@@ -1,0 +1,141 @@
+{
+  "version": "0.1",
+  "run_id": "run_fail_order_001",
+  "agent": "codex",
+  "model": "gpt-5.4",
+  "started_at": "2026-04-20T11:00:00.000Z",
+  "ended_at": "2026-04-20T11:00:08.000Z",
+  "duration_ms": 8000,
+  "metadata": { "scenario": "hook order regression — deploy.start runs before preflight" },
+  "events": [
+    {
+      "id": "e1",
+      "type": "skill.matched",
+      "name": "tfy-deploy",
+      "ts": "2026-04-20T11:00:00.100Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e2",
+      "type": "skill.activated",
+      "name": "tfy-deploy",
+      "ts": "2026-04-20T11:00:00.120Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e3",
+      "type": "hook.started",
+      "name": "deploy.start",
+      "ts": "2026-04-20T11:00:00.200Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e4",
+      "type": "hook.succeeded",
+      "name": "deploy.start",
+      "ts": "2026-04-20T11:00:02.000Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e5",
+      "type": "hook.started",
+      "name": "preflight.check_repo",
+      "ts": "2026-04-20T11:00:02.100Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e6",
+      "type": "hook.succeeded",
+      "name": "preflight.check_repo",
+      "ts": "2026-04-20T11:00:02.200Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e7",
+      "type": "hook.started",
+      "name": "preflight.check_auth",
+      "ts": "2026-04-20T11:00:02.300Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e8",
+      "type": "hook.succeeded",
+      "name": "preflight.check_auth",
+      "ts": "2026-04-20T11:00:02.400Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e9",
+      "type": "hook.started",
+      "name": "deploy.generate_config",
+      "ts": "2026-04-20T11:00:02.500Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e10",
+      "type": "file.created",
+      "name": ".truefoundry/service.yaml",
+      "ts": "2026-04-20T11:00:02.600Z",
+      "source": "native",
+      "confidence": "high",
+      "data": { "path": ".truefoundry/service.yaml" }
+    },
+    {
+      "id": "e11",
+      "type": "hook.succeeded",
+      "name": "deploy.generate_config",
+      "ts": "2026-04-20T11:00:02.700Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e12",
+      "type": "hook.started",
+      "name": "deploy.verify",
+      "ts": "2026-04-20T11:00:02.800Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e13",
+      "type": "hook.succeeded",
+      "name": "deploy.verify",
+      "ts": "2026-04-20T11:00:03.000Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {}
+    },
+    {
+      "id": "e14",
+      "type": "outcome.fail",
+      "name": "hook_order_regression",
+      "ts": "2026-04-20T11:00:03.100Z",
+      "source": "native",
+      "confidence": "high",
+      "data": {
+        "message": "deploy.start ran before preflight hooks",
+        "contains": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skill-check.dev/schemas/trace/v0.1.json",
+  "title": "skill-check normalized trace",
+  "description": "Canonical format for recording agent skill execution traces. All adapters (native, shim, parser, manual) produce this shape.",
+  "type": "object",
+  "required": ["version", "run_id", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "0.1",
+      "description": "Schema version."
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Unique identifier for this run."
+    },
+    "agent": {
+      "type": "string",
+      "description": "Agent that produced the trace (e.g. 'claude-code', 'codex', 'cursor')."
+    },
+    "model": {
+      "type": "string",
+      "description": "Model used during the run (e.g. 'claude-opus-4-6', 'gpt-5.4')."
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when the run started."
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when the run ended."
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total wall-clock duration in milliseconds."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Arbitrary key-value metadata (CI job ID, git SHA, etc.).",
+      "additionalProperties": true
+    },
+    "events": {
+      "type": "array",
+      "description": "Ordered list of normalized events.",
+      "items": { "$ref": "#/$defs/event" }
+    }
+  },
+
+  "$defs": {
+    "event": {
+      "type": "object",
+      "required": ["id", "type", "ts", "source", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique event ID within this trace (e.g. 'e1', 'evt_abc123')."
+        },
+        "type": {
+          "type": "string",
+          "description": "Namespaced event type. See event families below.",
+          "pattern": "^(lifecycle|skill|hook|tool|command|file|api|outcome)\\.[a-z_]+(\\.(attempted|called|created|deactivated|deleted|denied|discovered|ended|error|executed|fail|failed|matched|modified|pass|ready|skipped|started|succeeded|teardown|timeout|activated|[a-z_]+))*$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name scoped to the event type. For skill.activated this is the skill name; for hook.started this is the hook name; for command.executed this is the command string."
+        },
+        "ts": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of the event."
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Duration of the event in milliseconds (for events that span time)."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["native", "shim", "parsed", "manual"],
+          "description": "How this event was captured. native=agent adapter, shim=proxy/wrapper, parsed=log/transcript parser, manual=hand-authored."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "Confidence that this event actually occurred as described."
+        },
+        "parent_id": {
+          "type": "string",
+          "description": "ID of the parent event, for nesting (e.g. a command.executed inside a hook.started/hook.succeeded pair)."
+        },
+        "data": {
+          "type": "object",
+          "description": "Event-type-specific payload.",
+          "additionalProperties": true
+        },
+        "error": {
+          "type": "object",
+          "description": "Present only when the event represents a failure.",
+          "properties": {
+            "message": { "type": "string" },
+            "code": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}
