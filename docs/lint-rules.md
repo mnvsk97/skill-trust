@@ -39,7 +39,7 @@ The `name` field is absent or empty.
 ### `schema.invalid_name` _(error)_
 `name` is not a valid slug. Slugs must start with a lowercase letter and contain only lowercase letters, numbers, hyphens (`-`), or underscores (`_`).
 
-**Examples:** `tfy-deploy` ✔, `My Skill` ✖, `1st-skill` ✖
+**Examples:** `cloud-deploy` ✔, `My Skill` ✖, `1st-skill` ✖
 
 ### `schema.missing_desc` _(error)_
 The `description` field is absent or empty.
@@ -145,4 +145,4 @@ Note: `Bash` alone counts as all three legs (it can do everything).
 `allowed-tools` contains a wildcard (`*`) or the string `ALL`. Skills must declare only the specific tools they need — broad grants make security analysis impossible and create excessive attack surface.
 
 ### `security.cross_skill_tools` _(warn)_
-`allowed-tools` includes MCP tools whose namespace appears to belong to a different skill (e.g. `mcp__tfy_logs__get_logs` in a skill named `tfy-deploy`). This is a potential **tool-shadowing** vector: the deploying skill's instructions could modify how the logs skill behaves.
+`allowed-tools` includes MCP tools whose namespace appears to belong to a different skill (e.g. `mcp__cloud_logs__get_logs` in a skill named `cloud-deploy`). This is a potential **tool-shadowing** vector: one skill's instructions could modify how another skill behaves.

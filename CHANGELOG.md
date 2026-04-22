@@ -37,5 +37,5 @@ Initial release.
 - Normalized trace schema (`spec/trace-schema.json`)
 - Assertion suite schema (`spec/assertion-schema.json`)
 - Event families reference (`spec/event-families.md`)
-- Example TrueFoundry deploy skill + passing/failing test suites + traces
+- Example cloud deploy skill + passing/failing test suites + traces
 - Full documentation in `docs/`

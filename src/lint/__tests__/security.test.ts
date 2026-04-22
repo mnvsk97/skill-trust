@@ -53,9 +53,9 @@ describe("checkSecurityStructural – wildcard tools", () => {
 
 describe("checkSecurityStructural – cross-skill tools", () => {
   test("warns when allowed-tools references another skill namespace", () => {
-    // my-skill trying to use tfy-logs tools
+    // my-skill trying to use another skill's tools
     const skill = makeSkill(
-      ["Read", "mcp__tfy_logs__get_logs"],
+      ["Read", "mcp__other_skill__get_logs"],
       "my-skill",
     );
     const findings = checkSecurityStructural(skill);

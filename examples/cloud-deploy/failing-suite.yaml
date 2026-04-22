@@ -1,0 +1,108 @@
+version: "0.1"
+suite: "cloud-deploy-regressions"
+description: |
+  Intentionally failing test cases. Each trace contains a deliberate violation
+  of the deploy_happy_path contract. Use these to verify the assertion engine
+  produces the correct failure output for each assertion type.
+
+defaults:
+  agent: "claude-code"
+  model: "claude-sonnet-4-5"
+  timeout_ms: 60000
+
+fixtures:
+  - id: "express-app"
+    path: "./fixtures/express-app"
+
+tests:
+  # -----------------------------------------------------------
+  # Regression 1: hook order violation
+  # deploy runs BEFORE check-repo — order assertion must catch this
+  # -----------------------------------------------------------
+  - id: "hook_order_regression"
+    kind: "end_to_end"
+    description: "deploy fires before check-repo — order assertion must catch this"
+    prompt: "Deploy this Express app and verify it is healthy."
+    workspace_fixture: "express-app"
+    trace: "./traces/failing/hook_order_regression.trace.json"
+    should_activate:
+      - "cloud-deploy"
+    steps:
+      - "check-repo"
+      - "check-auth"
+      - "generate-config"
+      - "deploy"
+      - "verify"
+    outcome: "pass"
+
+  # -----------------------------------------------------------
+  # Regression 2: missing required step
+  # verify never runs — steps assertion must catch this
+  # -----------------------------------------------------------
+  - id: "missing_hook_regression"
+    kind: "end_to_end"
+    description: "verify is absent — steps assertion must catch this"
+    prompt: "Deploy this Express app and verify it is healthy."
+    workspace_fixture: "express-app"
+    trace: "./traces/failing/missing_hook_regression.trace.json"
+    should_activate:
+      - "cloud-deploy"
+    steps:
+      - "check-repo"
+      - "check-auth"
+      - "generate-config"
+      - "deploy"
+      - "verify"
+    outcome: "pass"
+
+  # -----------------------------------------------------------
+  # Regression 3: forbidden command executed
+  # rm -rf fires during deploy — dangerous assertion must catch this
+  # -----------------------------------------------------------
+  - id: "forbidden_command_regression"
+    kind: "end_to_end"
+    description: "rm -rf fires during deploy — dangerous assertion must catch this"
+    prompt: "Deploy this Express app and verify it is healthy."
+    workspace_fixture: "express-app"
+    trace: "./traces/failing/forbidden_command_regression.trace.json"
+    should_activate:
+      - "cloud-deploy"
+    steps:
+      - "check-repo"
+      - "check-auth"
+      - "generate-config"
+      - "deploy"
+      - "verify"
+    commands:
+      - "cloud-cli deploy"
+    dangerous:
+      - "rm -rf"
+    creates:
+      - ".deploy/service.yaml"
+    outcome: "pass"
+    outcome_contains:
+      - "deployment succeeded"
+      - "healthy"
+
+  # -----------------------------------------------------------
+  # Regression 4: outcome mismatch
+  # Health check returned 503 — outcome assertion must catch this
+  # -----------------------------------------------------------
+  - id: "outcome_mismatch_regression"
+    kind: "end_to_end"
+    description: "service is unhealthy after deploy — outcome assertion must catch this"
+    prompt: "Deploy this Express app and verify it is healthy."
+    workspace_fixture: "express-app"
+    trace: "./traces/failing/outcome_mismatch_regression.trace.json"
+    should_activate:
+      - "cloud-deploy"
+    steps:
+      - "check-repo"
+      - "check-auth"
+      - "generate-config"
+      - "deploy"
+      - "verify"
+    outcome: "pass"
+    outcome_contains:
+      - "deployment succeeded"
+      - "healthy"

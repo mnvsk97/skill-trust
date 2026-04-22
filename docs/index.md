@@ -6,7 +6,7 @@ The current CLI release ships the offline `lint` command. The assertion-suite an
 
 ## Navigation
 
-- [Getting started](getting-started.md)
+- [Getting started](../README.md) — install, quick start, overview
 - [CLI reference](cli.md)
 - [Lint rules](lint-rules.md)
 - [Assertion suite format](assertion-suite.md)

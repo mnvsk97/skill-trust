@@ -1,0 +1,97 @@
+version: "0.1"
+suite: "cloud-deploy-skills"
+description: "Tests for cloud deployment skills: install, activation, end-to-end deploy, and negative routing."
+
+defaults:
+  agent: "claude-code"
+  model: "claude-sonnet-4-5"
+  timeout_ms: 60000
+
+skills:
+  under_test:
+    source: "github:example-org/cloud-deploy-skills"
+    install:
+      method: "npx"
+      command: "npx skills add example-org/cloud-deploy-skills"
+
+fixtures:
+  - id: "express-app"
+    path: "./fixtures/express-app"
+
+tests:
+  # -----------------------------------------------------------
+  # 1. Install test — no prompt, just verify installation works
+  # -----------------------------------------------------------
+  - id: "install_from_npx"
+    kind: "install"
+    prompt: null
+    trace: "./traces/install_from_npx.trace.json"
+    exit_code: 0
+    discovers:
+      - "cloud-deploy"
+      - "cloud-logs"
+      - "cloud-status"
+    should_not_run:
+      - "deploy"
+
+  # -----------------------------------------------------------
+  # 2. Activation test — correct skill routes for deploy prompt
+  # -----------------------------------------------------------
+  - id: "trigger_deploy_skill"
+    kind: "activation"
+    prompt: "Deploy this service to the cloud"
+    workspace_fixture: "express-app"
+    trace: "./traces/trigger_deploy_skill.trace.json"
+    should_activate:
+      - "cloud-deploy"
+    should_not_activate:
+      - "cloud-logs"
+      - "cloud-status"
+
+  # -----------------------------------------------------------
+  # 3. End-to-end deploy — full happy path
+  # -----------------------------------------------------------
+  - id: "deploy_happy_path"
+    kind: "end_to_end"
+    prompt: "Deploy this Express app and verify it is healthy."
+    workspace_fixture: "express-app"
+    timeout_ms: 120000
+    trace: "./traces/deploy_happy_path.trace.json"
+    should_activate:
+      - "cloud-deploy"
+    steps:
+      - "check-repo"
+      - "check-auth"
+      - "generate-config"
+      - "deploy"
+      - "verify"
+    should_not_run:
+      - "rollback"
+    commands:
+      - "cloud-cli deploy"
+    dangerous:
+      - "rm -rf"
+    creates:
+      - ".deploy/service.yaml"
+    api_calls:
+      - "create_service"
+      - "get_service_health"
+    outcome: "pass"
+    outcome_contains:
+      - "deployment succeeded"
+      - "healthy"
+
+  # -----------------------------------------------------------
+  # 4. Negative test — logs prompt must NOT trigger deploy skill
+  # -----------------------------------------------------------
+  - id: "logs_prompt_should_not_deploy"
+    kind: "negative_activation"
+    prompt: "Show me the latest deployment logs for this service"
+    workspace_fixture: "express-app"
+    trace: "./traces/logs_prompt_should_not_deploy.trace.json"
+    should_activate:
+      - "cloud-logs"
+    should_not_activate:
+      - "cloud-deploy"
+    should_not_run:
+      - "deploy"

@@ -26,7 +26,7 @@ export interface LintResult {
 // ─── SKILL.md frontmatter types ───────────────────────────────────────────────
 
 export interface SkillFrontmatter {
-  /** Unique skill name slug, e.g. "tfy-deploy" */
+  /** Unique skill name slug, e.g. "cloud-deploy" */
   name: string;
   /** One-line human description */
   description: string;

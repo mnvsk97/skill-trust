@@ -42,7 +42,7 @@ describe("checkSchema", () => {
   });
 
   test("accepts hyphenated names", () => {
-    const skill = makeSkill({ name: "tfy-deploy", description: "A valid description" });
+    const skill = makeSkill({ name: "cloud-deploy", description: "A valid description" });
     const findings = checkSchema(skill);
     expect(findings.some((f) => f.rule === "schema.invalid_name")).toBe(false);
     expect(findings.some((f) => f.rule === "schema.missing_name")).toBe(false);

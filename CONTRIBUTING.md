@@ -26,7 +26,7 @@ skill-check/
 │   ├── assertion-schema.json     # Test suite assertion schema
 │   └── event-families.md         # Event type reference
 └── examples/
-    └── tfy-deploy/               # End-to-end example suite
+    └── cloud-deploy/             # End-to-end example suite
 ```
 
 ## Development setup
@@ -37,7 +37,7 @@ cd skill-check
 npm install
 npm run build      # compile TypeScript
 npm test           # run jest tests
-npm run dev -- lint ./examples/tfy-deploy   # run CLI in dev mode
+npm run dev -- lint ./examples/cloud-deploy  # run CLI in dev mode
 ```
 
 ## Adding a lint rule
@@ -59,7 +59,7 @@ npm run dev -- lint ./examples/tfy-deploy   # run CLI in dev mode
 
 ## Adding an example
 
-Drop a `suite.yaml` and fixture + trace files under `examples/<skill-name>/`. Follow the pattern in `examples/tfy-deploy/`.
+Drop a `suite.yaml` and fixture + trace files under `examples/<skill-name>/`. Follow the pattern in `examples/cloud-deploy/`.
 
 ## Schemas
 

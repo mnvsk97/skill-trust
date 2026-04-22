@@ -84,13 +84,12 @@ export function parseSkillMd(skillMdPath: string): ParsedSkill {
  * Throws if SKILL.md does not exist.
  */
 export function resolveSkillMd(inputPath: string): string {
-  const stat = (() => {
-    try {
-      return fs.statSync(inputPath);
-    } catch {
-      return null;
-    }
-  })();
+  let stat: fs.Stats | null = null;
+  try {
+    stat = fs.statSync(inputPath);
+  } catch {
+    // Path does not exist — handled below
+  }
 
   if (stat?.isDirectory()) {
     const candidate = path.join(inputPath, "SKILL.md");

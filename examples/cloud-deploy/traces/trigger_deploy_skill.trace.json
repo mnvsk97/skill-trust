@@ -1,8 +1,8 @@
 {
   "version": "0.1",
   "run_id": "run_activate_001",
-  "agent": "codex",
-  "model": "gpt-5.4",
+  "agent": "claude-code",
+  "model": "claude-sonnet-4-5",
   "started_at": "2026-04-20T10:01:00.000Z",
   "ended_at": "2026-04-20T10:01:01.800Z",
   "duration_ms": 1800,
@@ -11,20 +11,20 @@
     {
       "id": "e1",
       "type": "skill.matched",
-      "name": "tfy-deploy",
+      "name": "cloud-deploy",
       "ts": "2026-04-20T10:01:00.100Z",
       "source": "native",
       "confidence": "high",
       "data": {
-        "prompt": "Deploy this service to TrueFoundry",
-        "candidates": ["tfy-deploy", "tfy-logs", "tfy-status"],
+        "prompt": "Deploy this service to the cloud",
+        "candidates": ["cloud-deploy", "cloud-logs", "cloud-status"],
         "score": 0.95
       }
     },
     {
       "id": "e2",
       "type": "skill.activated",
-      "name": "tfy-deploy",
+      "name": "cloud-deploy",
       "ts": "2026-04-20T10:01:00.120Z",
       "source": "native",
       "confidence": "high",

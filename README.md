@@ -95,51 +95,15 @@ Runs a skill against a real agent and captures a normalized trace. The trace can
 
 ## Lint rules
 
-### Schema rules (`schema.*`)
+Six rule families covering schema, description quality, file references, scripts, and security. See [docs/lint-rules.md](docs/lint-rules.md) for the full reference.
 
-| Rule | Severity | Description |
-|---|---|---|
-| `schema.no_frontmatter` | error | SKILL.md has no YAML `---` block |
-| `schema.missing_name` | error | `name` field absent or empty |
-| `schema.invalid_name` | error | `name` is not a valid slug |
-| `schema.missing_desc` | error | `description` field absent or empty |
-| `schema.allowed_tools_type` | error | `allowed-tools` is not an array of strings |
-| `schema.invalid_version` | warn | `version` doesn't look like semver |
-
-### Description rules (`desc.*`)
-
-| Rule | Severity | Description |
-|---|---|---|
-| `desc.too_short` | warn | `description` < 20 chars |
-| `desc.no_body` | warn | No body text after frontmatter |
-| `desc.body_too_short` | warn | Body < 50 chars |
-| `desc.missing_h1` | info | No `# Heading` in body |
-
-### File reference rules (`files.*`)
-
-| Rule | Severity | Description |
-|---|---|---|
-| `files.ref_not_found` | error | Linked file doesn't exist on disk |
-| `files.outside_root` | error | Linked path escapes the skill root |
-
-### Script rules (`scripts.*`)
-
-| Rule | Severity | Description |
-|---|---|---|
-| `scripts.not_executable` | warn | `.sh` file lacks executable bit |
-| `scripts.missing_shebang` | warn | Shell script has no `#!` line |
-| `scripts.empty_script` | warn | Script file is empty |
-
-### Security — static patterns (`security.*`)
-
-| Rule | Severity | Description |
-|---|---|---|
-| `security.prompt_injection` | error | Injection trigger phrase detected (ignore previous instructions, DAN, etc.) |
-| `security.exfil_url` | error/warn | `curl`/`wget` to external URL, suspicious data-bearing URL |
-| `security.hardcoded_secret` | error | API key, AWS credential, GitHub token literal |
-| `security.toxic_flow` | warn | Skill has read + write + network tools (lethal trifecta) |
-| `security.overly_broad_tools` | error | `allowed-tools` contains `*` or `ALL` |
-| `security.cross_skill_tools` | warn | `allowed-tools` references another skill's MCP namespace |
+| Family | What it checks |
+|---|---|
+| `schema.*` | Frontmatter structure (name, description, allowed-tools) |
+| `desc.*` | Description quality and body content |
+| `files.*` | File reference existence and path safety |
+| `scripts.*` | Executable bit, shebang, non-empty |
+| `security.*` | Injection patterns, secrets, tool capability analysis |
 
 ---
 
@@ -151,26 +115,17 @@ Assertion suites are YAML files validated against [`spec/assertion-schema.json`]
 version: "0.1"
 suite: "my-skill-tests"
 
-skills:
-  under_test:
-    source: "github:org/my-skill"
-
 tests:
   - id: "happy_path"
     kind: "end_to_end"
     prompt: "Do the thing"
-    expect:
-      hooks:
-        required:
-          - "preflight.check"
-          - "action.run"
-        order:
-          - "preflight.check -> action.run"
-      outcome:
-        status: "pass"
+    steps:
+      - "preflight"
+      - "action"
+    outcome: "pass"
 ```
 
-See [`examples/tfy-deploy/suite.yaml`](examples/tfy-deploy/suite.yaml) for a full working example.
+See [`examples/cloud-deploy/suite.yaml`](examples/cloud-deploy/suite.yaml) for a full working example.
 
 ---
 

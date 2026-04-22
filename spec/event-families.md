@@ -63,7 +63,7 @@ Events for when the agent invokes a tool (MCP tool, function call, etc.).
 | `tool.succeeded` | Tool returned a result |
 | `tool.failed` | Tool returned an error |
 
-`name` = the tool name (e.g. `Read`, `Bash`, `mcp__tfy__deploy`).
+`name` = the tool name (e.g. `Read`, `Bash`, `mcp__myserver__deploy`).
 
 `data` should include:
 - `arguments`: the tool call arguments (redact secrets)
@@ -81,7 +81,7 @@ Events for shell commands executed by the agent or by hooks.
 | `command.succeeded` | Command exited with code 0 |
 | `command.failed` | Command exited with non-zero code |
 
-`name` = the command string (e.g. `tfy service deploy`, `npm install`).
+`name` = the command string (e.g. `cloud-cli deploy`, `npm install`).
 
 `data` should include:
 - `exit_code`: integer

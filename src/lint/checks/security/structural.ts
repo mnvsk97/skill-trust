@@ -138,16 +138,11 @@ export function checkSecurityStructural(skill: ParsedSkill): LintFinding[] {
   const effectiveNetwork = hasNetwork || hasOmnibus;
 
   if (effectiveRead && effectiveWrite && effectiveNetwork) {
-    const legs: string[] = [];
-    if (effectiveRead) legs.push("read");
-    if (effectiveWrite) legs.push("write/exec");
-    if (effectiveNetwork) legs.push("network");
-
     findings.push({
       rule: "security.toxic_flow",
       severity: "warn",
       message:
-        `This skill has all three capability legs (${legs.join(", ")}), which enables the "toxic flow" exfiltration pattern: ` +
+        "This skill has all three capability legs (read, write/exec, network), which enables the \"toxic flow\" exfiltration pattern: " +
         "sensitive data can be read, then sent over the network. " +
         "Review whether all three capability types are truly necessary.",
       file,

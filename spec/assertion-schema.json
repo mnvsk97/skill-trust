@@ -1,15 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://skill-check.dev/schemas/assertion/v0.1.json",
-  "title": "skill-check test suite",
-  "description": "YAML assertion spec for validating normalized traces against expectations.",
+  "title": "skill-check spec file",
+  "description": "YAML spec file for validating skill behavior against recorded traces.",
   "type": "object",
   "required": ["version", "suite", "tests"],
   "additionalProperties": false,
   "properties": {
     "version": {
       "const": "0.1",
-      "description": "Spec version."
+      "description": "Spec version. Always \"0.1\"."
     },
     "suite": {
       "type": "string",
@@ -38,34 +38,29 @@
           "minimum": 0,
           "description": "Default timeout per test in milliseconds."
         },
-        "min_confidence": {
-          "type": "string",
-          "enum": ["high", "medium", "low"],
-          "description": "Default minimum event confidence for assertions to apply."
-        },
         "max_turns": {
           "type": "integer",
           "minimum": 1,
           "default": 20,
-          "description": "Maximum tester↔target turns before the test is terminated with outcome.error."
+          "description": "Maximum tester-target turns before the test is terminated."
         },
         "max_budget_usd": {
           "type": "number",
           "minimum": 0,
-          "description": "Maximum API spend per test case in USD. Applied to both tester and target agents."
+          "description": "Maximum API spend per test case in USD."
         },
         "eval_runs": {
           "type": "integer",
           "minimum": 1,
           "default": 3,
-          "description": "How many times each eval test case is run. Results are aggregated into a pass rate."
+          "description": "How many times each eval test case is run."
         },
         "min_pass_rate": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
           "default": 0.9,
-          "description": "Fraction of eval runs that must pass for the test to pass."
+          "description": "Fraction of eval runs that must pass."
         }
       }
     },
@@ -112,17 +107,6 @@
             "method": { "type": "string" },
             "command": { "type": "string" }
           }
-        },
-        "expected": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "skill_names": {
-              "type": "array",
-              "items": { "type": "string" },
-              "description": "Skill names expected to be available after install."
-            }
-          }
         }
       }
     },
@@ -138,11 +122,11 @@
         },
         "path": {
           "type": "string",
-          "description": "Path to fixture directory (relative to suite file). Copied fresh per test case."
+          "description": "Path to fixture directory (relative to suite file)."
         },
         "user_home": {
           "type": "string",
-          "description": "Optional path to a directory mounted as ~/.claude/ in the container. Omit for a clean new-user environment (empty ~/.claude/). Provide a pre-seeded directory for existing-user scenarios."
+          "description": "Path to a directory mounted as ~/.claude/ in the test container."
         }
       }
     },
@@ -153,18 +137,18 @@
       "properties": {
         "persona": {
           "type": "string",
-          "description": "Natural language description of the user persona appended to the tester agent's system prompt. E.g. 'junior developer, first deployment, does not know the workspace name'."
+          "description": "Natural language persona for the tester agent."
         },
         "model": {
           "type": "string",
-          "description": "Model for the tester agent. Defaults to haiku (cheap — tester just needs to hold a conversation)."
+          "description": "Model for the tester agent."
         }
       }
     },
 
     "test_case": {
       "type": "object",
-      "required": ["id", "kind", "expect"],
+      "required": ["id", "kind"],
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -174,7 +158,7 @@
         "kind": {
           "type": "string",
           "enum": ["install", "activation", "negative_activation", "end_to_end"],
-          "description": "Test kind determines which assertions are valid."
+          "description": "Test kind."
         },
         "description": {
           "type": "string",
@@ -182,7 +166,7 @@
         },
         "prompt": {
           "type": ["string", "null"],
-          "description": "Natural language prompt to send to the agent. Null for install tests."
+          "description": "Prompt to send to the agent. Null for install tests."
         },
         "workspace_fixture": {
           "type": "string",
@@ -190,7 +174,7 @@
         },
         "trace": {
           "type": "string",
-          "description": "Path to a pre-recorded trace file (for assert/replay modes)."
+          "description": "Path to a pre-recorded trace file."
         },
         "timeout_ms": {
           "type": "integer",
@@ -200,7 +184,7 @@
         "max_turns": {
           "type": "integer",
           "minimum": 1,
-          "description": "Override default max tester↔target turns for this test."
+          "description": "Override default max turns for this test."
         },
         "max_budget_usd": {
           "type": "number",
@@ -211,236 +195,112 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Override default minimum eval pass rate for this test."
+          "description": "Override default min eval pass rate for this test."
         },
         "tester": {
           "$ref": "#/$defs/tester_config",
-          "description": "Tester agent configuration. Omit for minimal (seed prompt only)."
+          "description": "Tester agent configuration."
         },
-        "expect": {
-          "$ref": "#/$defs/expectations"
-        }
-      }
-    },
 
-    "expectations": {
-      "type": "object",
-      "description": "All assertion blocks for a test case.",
-      "additionalProperties": false,
-      "properties": {
-        "lifecycle": {
-          "$ref": "#/$defs/lifecycle_assertions"
+        "should_activate": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Skills that must activate for this prompt."
         },
-        "skills": {
-          "$ref": "#/$defs/skill_assertions"
+        "should_not_activate": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Skills that must NOT activate for this prompt."
         },
-        "hooks": {
-          "$ref": "#/$defs/hook_assertions"
+        "discovers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Skills that must be discovered after install."
         },
-        "tools": {
-          "$ref": "#/$defs/named_assertions"
+
+        "steps": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Workflow steps that must run, in this order."
         },
+        "should_not_run": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Workflow steps that must NOT run."
+        },
+
         "commands": {
-          "$ref": "#/$defs/named_assertions"
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Shell commands that must be executed."
         },
-        "files": {
-          "$ref": "#/$defs/file_assertions"
+        "dangerous": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Shell commands that must NOT be executed."
         },
-        "api": {
-          "$ref": "#/$defs/api_assertions"
+
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tools that must be invoked."
+        },
+        "forbidden_tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tools that must NOT be invoked."
+        },
+
+        "creates": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Files that must be created."
+        },
+        "modifies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Files that must be modified."
+        },
+        "deletes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Files that must be deleted."
+        },
+        "should_not_create": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Files that must NOT be created."
+        },
+
+        "api_calls": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "API operations that must be called."
+        },
+        "forbidden_api_calls": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "API operations that must NOT be called."
+        },
+
+        "exit_code": {
+          "type": "integer",
+          "description": "Expected exit code (for install tests)."
         },
         "outcome": {
-          "$ref": "#/$defs/outcome_assertions"
-        }
-      }
-    },
-
-    "lifecycle_assertions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "install": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "exit_code": { "type": "integer" }
-          }
-        }
-      }
-    },
-
-    "skill_assertions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "discovered": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Skills that must appear as skill.discovered events."
-        },
-        "matched": {
-          "$ref": "#/$defs/required_forbidden_list",
-          "description": "Skills that must (or must not) appear as skill.matched events. Matching is inferred evidence and is emitted at medium confidence. It does not satisfy required assertions unless the effective min_confidence is explicitly set to medium or lower."
-        },
-        "activated": {
-          "$ref": "#/$defs/required_forbidden_list",
-          "description": "Skills that must (or must not) appear as skill.activated events. Activation is inferred from SKILL.md read events and is emitted at medium confidence. It does not satisfy required assertions unless the effective min_confidence is explicitly set to medium or lower. Use hooks/commands as the primary gate for negative activation tests."
-        },
-        "order": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Relative activation order constraints as 'skill_a -> skill_b' strings. Ordering is evaluated over successful activation evidence only and treats activations as advisory unless min_confidence is explicitly lowered."
-        }
-      }
-    },
-
-    "hook_assertions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "required": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/named_assertion_item" },
-          "description": "Hooks that must appear (as hook.started + hook.succeeded)."
-        },
-        "forbidden": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Hook names that must NOT appear."
-        },
-        "order": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Order constraints as 'a -> b -> c' strings. Each string defines a chain that must hold in the trace."
-        }
-      }
-    },
-
-    "named_assertions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "required": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/named_assertion_item" },
-          "description": "Names that must appear in the trace. Each item is a name string or an object with name + min_confidence."
-        },
-        "forbidden": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Names that must NOT appear in the trace."
-        }
-      }
-    },
-
-    "named_assertion_item": {
-      "oneOf": [
-        { "type": "string" },
-        {
-          "type": "object",
-          "required": ["name"],
-          "additionalProperties": false,
-          "properties": {
-            "name": { "type": "string" },
-            "min_confidence": {
-              "type": "string",
-              "enum": ["high", "medium", "low"]
-            }
-          }
-        }
-      ],
-      "description": "Either a plain hook name string or an object with name + confidence requirement."
-    },
-
-    "required_forbidden_list": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "required": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "forbidden": {
-          "type": "array",
-          "items": { "type": "string" }
-        }
-      }
-    },
-
-    "file_assertions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "created": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Relative file paths that must have file.created events in the trace."
-        },
-        "modified": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Relative file paths that must have file.modified events in the trace."
-        },
-        "deleted": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Relative file paths that must have file.deleted events in the trace."
-        },
-        "not_created": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Relative file paths that must NOT have file.created events in the trace."
-        }
-      }
-    },
-
-    "api_assertions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "required": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["name"],
-            "additionalProperties": false,
-            "properties": {
-              "name": { "type": "string", "description": "Logical API operation name." },
-              "method": { "type": "string" },
-              "status": { "type": "integer" }
-            }
-          }
-        },
-        "forbidden": {
-          "type": "array",
-          "items": { "type": "string" }
-        }
-      }
-    },
-
-    "outcome_assertions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "status": {
           "type": "string",
           "enum": ["pass", "fail", "error", "timeout"],
-          "description": "Hard gate. CI fails if the final outcome status does not match."
+          "description": "Expected final outcome status."
         },
-        "data": {
-          "type": "object",
-          "description": "Hard gate. Match against structured fields in the outcome event's data payload.",
-          "additionalProperties": true
-        },
-        "contains": {
+        "outcome_contains": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "Soft check only. Produces warnings, never CI failures."
+          "description": "Strings that should appear in outcome data (soft check, warnings only)."
         },
-        "not_contains": {
+        "outcome_not_contains": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "Soft check only. Produces warnings, never CI failures."
+          "description": "Strings that should NOT appear in outcome data (soft check, warnings only)."
         }
       }
     }

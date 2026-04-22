@@ -1,8 +1,8 @@
 {
   "version": "0.1",
   "run_id": "run_fail_cmd_001",
-  "agent": "codex",
-  "model": "gpt-5.4",
+  "agent": "claude-code",
+  "model": "claude-sonnet-4-5",
   "started_at": "2026-04-20T11:02:00.000Z",
   "ended_at": "2026-04-20T11:02:10.000Z",
   "duration_ms": 10000,
@@ -11,7 +11,7 @@
     {
       "id": "e1",
       "type": "skill.matched",
-      "name": "tfy-deploy",
+      "name": "cloud-deploy",
       "ts": "2026-04-20T11:02:00.100Z",
       "source": "native",
       "confidence": "high",
@@ -20,7 +20,7 @@
     {
       "id": "e2",
       "type": "skill.activated",
-      "name": "tfy-deploy",
+      "name": "cloud-deploy",
       "ts": "2026-04-20T11:02:00.120Z",
       "source": "native",
       "confidence": "high",
@@ -29,7 +29,7 @@
     {
       "id": "e3",
       "type": "hook.started",
-      "name": "preflight.check_repo",
+      "name": "check-repo",
       "ts": "2026-04-20T11:02:00.200Z",
       "source": "native",
       "confidence": "high",
@@ -38,7 +38,7 @@
     {
       "id": "e4",
       "type": "hook.succeeded",
-      "name": "preflight.check_repo",
+      "name": "check-repo",
       "ts": "2026-04-20T11:02:00.260Z",
       "source": "native",
       "confidence": "high",
@@ -47,7 +47,7 @@
     {
       "id": "e5",
       "type": "hook.started",
-      "name": "preflight.check_auth",
+      "name": "check-auth",
       "ts": "2026-04-20T11:02:00.300Z",
       "source": "native",
       "confidence": "high",
@@ -56,7 +56,7 @@
     {
       "id": "e6",
       "type": "hook.succeeded",
-      "name": "preflight.check_auth",
+      "name": "check-auth",
       "ts": "2026-04-20T11:02:00.340Z",
       "source": "native",
       "confidence": "high",
@@ -65,7 +65,7 @@
     {
       "id": "e7",
       "type": "hook.started",
-      "name": "deploy.generate_config",
+      "name": "generate-config",
       "ts": "2026-04-20T11:02:00.400Z",
       "source": "native",
       "confidence": "high",
@@ -74,7 +74,7 @@
     {
       "id": "e8",
       "type": "command.executed",
-      "name": "rm -rf .truefoundry",
+      "name": "rm -rf .deploy",
       "ts": "2026-04-20T11:02:00.410Z",
       "source": "native",
       "confidence": "high",
@@ -84,16 +84,16 @@
     {
       "id": "e9",
       "type": "file.created",
-      "name": ".truefoundry/service.yaml",
+      "name": ".deploy/service.yaml",
       "ts": "2026-04-20T11:02:00.430Z",
       "source": "native",
       "confidence": "high",
-      "data": { "path": ".truefoundry/service.yaml" }
+      "data": { "path": ".deploy/service.yaml" }
     },
     {
       "id": "e10",
       "type": "hook.succeeded",
-      "name": "deploy.generate_config",
+      "name": "generate-config",
       "ts": "2026-04-20T11:02:00.450Z",
       "source": "native",
       "confidence": "high",
@@ -102,7 +102,7 @@
     {
       "id": "e11",
       "type": "hook.started",
-      "name": "deploy.start",
+      "name": "deploy",
       "ts": "2026-04-20T11:02:00.500Z",
       "source": "native",
       "confidence": "high",
@@ -111,7 +111,7 @@
     {
       "id": "e12",
       "type": "command.executed",
-      "name": "tfy service deploy",
+      "name": "cloud-cli deploy",
       "ts": "2026-04-20T11:02:00.520Z",
       "source": "native",
       "confidence": "high",
@@ -126,12 +126,12 @@
       "source": "shim",
       "confidence": "high",
       "parent_id": "e11",
-      "data": { "method": "POST", "url": "https://sandbox.truefoundry.example/api/v1/services", "status": 201 }
+      "data": { "method": "POST", "url": "https://api.example.com/v1/services", "status": 201 }
     },
     {
       "id": "e14",
       "type": "hook.succeeded",
-      "name": "deploy.start",
+      "name": "deploy",
       "ts": "2026-04-20T11:02:02.100Z",
       "source": "native",
       "confidence": "high",
@@ -140,7 +140,7 @@
     {
       "id": "e15",
       "type": "hook.started",
-      "name": "deploy.verify",
+      "name": "verify",
       "ts": "2026-04-20T11:02:02.200Z",
       "source": "native",
       "confidence": "high",
@@ -154,12 +154,12 @@
       "source": "shim",
       "confidence": "high",
       "parent_id": "e15",
-      "data": { "method": "GET", "url": "https://sandbox.truefoundry.example/api/v1/services/svc_123/health", "status": 200 }
+      "data": { "method": "GET", "url": "https://api.example.com/v1/services/svc_123/health", "status": 200 }
     },
     {
       "id": "e17",
       "type": "hook.succeeded",
-      "name": "deploy.verify",
+      "name": "verify",
       "ts": "2026-04-20T11:02:02.500Z",
       "source": "native",
       "confidence": "high",

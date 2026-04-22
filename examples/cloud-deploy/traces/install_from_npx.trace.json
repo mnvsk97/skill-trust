@@ -1,8 +1,8 @@
 {
   "version": "0.1",
   "run_id": "run_install_001",
-  "agent": "codex",
-  "model": "gpt-5.4",
+  "agent": "claude-code",
+  "model": "claude-sonnet-4-5",
   "started_at": "2026-04-20T10:00:00.000Z",
   "ended_at": "2026-04-20T10:00:03.100Z",
   "duration_ms": 3100,
@@ -14,7 +14,7 @@
     {
       "id": "e1",
       "type": "lifecycle.install.started",
-      "name": "npx skills add truefoundry/tfy-deploy-skills",
+      "name": "npx skills add example-org/cloud-deploy-skills",
       "ts": "2026-04-20T10:00:00.000Z",
       "source": "native",
       "confidence": "high",
@@ -23,7 +23,7 @@
     {
       "id": "e2",
       "type": "lifecycle.install.succeeded",
-      "name": "npx skills add truefoundry/tfy-deploy-skills",
+      "name": "npx skills add example-org/cloud-deploy-skills",
       "ts": "2026-04-20T10:00:02.800Z",
       "source": "native",
       "confidence": "high",
@@ -34,7 +34,7 @@
     {
       "id": "e3",
       "type": "skill.discovered",
-      "name": "tfy-deploy",
+      "name": "cloud-deploy",
       "ts": "2026-04-20T10:00:02.900Z",
       "source": "native",
       "confidence": "high",
@@ -43,7 +43,7 @@
     {
       "id": "e4",
       "type": "skill.discovered",
-      "name": "tfy-logs",
+      "name": "cloud-logs",
       "ts": "2026-04-20T10:00:02.950Z",
       "source": "native",
       "confidence": "high",
@@ -52,7 +52,7 @@
     {
       "id": "e5",
       "type": "skill.discovered",
-      "name": "tfy-status",
+      "name": "cloud-status",
       "ts": "2026-04-20T10:00:03.000Z",
       "source": "native",
       "confidence": "high",
