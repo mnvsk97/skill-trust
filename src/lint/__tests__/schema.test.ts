@@ -54,11 +54,31 @@ describe("checkSchema", () => {
     expect(findings.some((f) => f.rule === "schema.missing_desc")).toBe(true);
   });
 
-  test("errors on allowed-tools as non-array", () => {
+  test("accepts allowed-tools as space-separated string", () => {
     const skill = makeSkill({
       name: "my-skill",
       description: "A valid description",
-      "allowed-tools": "Read",
+      "allowed-tools": "Bash(tfy*) Bash(curl *) Read",
+    });
+    const findings = checkSchema(skill);
+    expect(findings.some((f) => f.rule === "schema.allowed_tools_type")).toBe(false);
+  });
+
+  test("errors on allowed-tools as empty string", () => {
+    const skill = makeSkill({
+      name: "my-skill",
+      description: "A valid description",
+      "allowed-tools": "  ",
+    });
+    const findings = checkSchema(skill);
+    expect(findings.some((f) => f.rule === "schema.allowed_tools_type")).toBe(true);
+  });
+
+  test("errors on allowed-tools as number", () => {
+    const skill = makeSkill({
+      name: "my-skill",
+      description: "A valid description",
+      "allowed-tools": 42,
     });
     const findings = checkSchema(skill);
     expect(findings.some((f) => f.rule === "schema.allowed_tools_type")).toBe(true);

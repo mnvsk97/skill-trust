@@ -32,8 +32,8 @@ export interface SkillFrontmatter {
   description: string;
   /** Semver skill version */
   version?: string;
-  /** List of tool names the skill is allowed to use */
-  "allowed-tools"?: string[];
+  /** Tool names the skill is allowed to use (array or space-separated string) */
+  "allowed-tools"?: string[] | string;
   /** Additional arbitrary fields (not validated, passed through) */
   [key: string]: unknown;
 }

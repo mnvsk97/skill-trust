@@ -75,11 +75,13 @@ function classifyTools(tools: string[]): {
   let hasOmnibus = false;
 
   for (const t of tools) {
-    if (OMNIBUS_TOOLS.has(t)) hasOmnibus = true;
-    if (READ_TOOLS.has(t)) hasRead = true;
-    if (EXEC_TOOLS.has(t)) hasExec = true;
-    if (WRITE_TOOLS.has(t)) hasWrite = true;
-    if (NETWORK_TOOLS.has(t)) hasNetwork = true;
+    // Extract base tool name: "Bash(tfy*)" → "Bash", "Read" → "Read"
+    const base = t.replace(/\(.*\)$/, "");
+    if (OMNIBUS_TOOLS.has(base)) hasOmnibus = true;
+    if (READ_TOOLS.has(base)) hasRead = true;
+    if (EXEC_TOOLS.has(base)) hasExec = true;
+    if (WRITE_TOOLS.has(base)) hasWrite = true;
+    if (NETWORK_TOOLS.has(base)) hasNetwork = true;
   }
 
   return { hasRead, hasExec, hasWrite, hasNetwork, hasOmnibus };
@@ -113,13 +115,27 @@ export function checkSecurityStructural(skill: ParsedSkill): LintFinding[] {
   const findings: LintFinding[] = [];
   const file = "SKILL.md";
 
-  const tools = skill.frontmatter["allowed-tools"];
-  if (!Array.isArray(tools) || tools.length === 0) return findings;
+  const rawTools = skill.frontmatter["allowed-tools"];
+  let toolNames: string[];
 
-  const toolNames = tools.filter((t) => typeof t === "string") as string[];
+  if (Array.isArray(rawTools)) {
+    toolNames = rawTools.filter((t) => typeof t === "string") as string[];
+  } else if (typeof rawTools === "string" && rawTools.trim() !== "") {
+    // Space-separated string format: "Bash(tfy*) Bash(curl *) Read"
+    // Each token is Name or Name(pattern) — pattern can contain spaces
+    toolNames = rawTools.match(/[^\s(]+(?:\([^)]*\))?/g) ?? [];
+  } else {
+    return findings;
+  }
+
+  if (toolNames.length === 0) return findings;
 
   // ── Wildcard / overly broad grants ────────────────────────────────────────
-  const wildcards = toolNames.filter((t) => t.includes("*") || t === "ALL");
+  // Only flag bare "*" or "ALL" — not scoped globs like "Bash(tfy*)"
+  const wildcards = toolNames.filter((t) => {
+    const base = t.replace(/\(.*\)$/, "");
+    return base === "*" || base === "ALL";
+  });
   if (wildcards.length > 0) {
     findings.push({
       rule: "security.overly_broad_tools",

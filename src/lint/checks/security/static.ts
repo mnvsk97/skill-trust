@@ -69,8 +69,17 @@ const EXFIL_PATTERNS: SecurityPattern[] = [
   {
     rule: "security.exfil_url",
     severity: "error",
-    label: "curl/wget to external URL",
-    pattern: /\b(?:curl|wget)\s+.*https?:\/\/(?!localhost|127\.0\.0\.1)/i,
+    label: "curl/wget piping sensitive data to external URL",
+    // Only flag curl/wget when it sends data outbound: -d, --data, -F, --upload,
+    // or piped input ($(...), backticks, < redirect, |)
+    pattern: /\b(?:curl|wget)\b.*(?:-[dF]\s|--data|--upload|--post-data|\$\(|`[^`]+`|<\s*[^\s]|\|\s*(?:curl|wget)).*https?:\/\/(?!localhost|127\.0\.0\.1)/i,
+  },
+  {
+    rule: "security.exfil_url",
+    severity: "error",
+    label: "Piping data to curl/wget",
+    // Catches: cat secret | curl, echo $TOKEN | wget, etc.
+    pattern: /\|[^|]*\b(?:curl|wget)\b[^|]*https?:\/\/(?!localhost|127\.0\.0\.1)/i,
   },
   {
     rule: "security.exfil_url",

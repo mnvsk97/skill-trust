@@ -38,7 +38,7 @@ describe("checkSecurityStructural – toxic flow", () => {
 });
 
 describe("checkSecurityStructural – wildcard tools", () => {
-  test("errors on wildcard entry", () => {
+  test("errors on bare wildcard entry", () => {
     const skill = makeSkill(["Read", "*"]);
     const findings = checkSecurityStructural(skill);
     expect(findings.some((f) => f.rule === "security.overly_broad_tools")).toBe(true);
@@ -48,6 +48,37 @@ describe("checkSecurityStructural – wildcard tools", () => {
     const skill = makeSkill(["ALL"]);
     const findings = checkSecurityStructural(skill);
     expect(findings.some((f) => f.rule === "security.overly_broad_tools")).toBe(true);
+  });
+
+  test("does not error on scoped glob like Bash(tfy*)", () => {
+    const skill = makeSkill(["Bash(tfy*)", "Read"]);
+    const findings = checkSecurityStructural(skill);
+    expect(findings.some((f) => f.rule === "security.overly_broad_tools")).toBe(false);
+  });
+});
+
+describe("checkSecurityStructural – string format allowed-tools", () => {
+  test("parses space-separated string format", () => {
+    const skill: ParsedSkill = {
+      skillMdPath: "/tmp/skill/SKILL.md",
+      skillRoot: "/tmp/skill",
+      frontmatter: {
+        name: "my-skill",
+        description: "Test",
+        "allowed-tools": "Bash(tfy*) Bash(curl *) Read" as any,
+      },
+      body: "# My Skill\n\nSome instructions here.",
+      rawFrontmatter: "name: my-skill",
+    };
+    const findings = checkSecurityStructural(skill);
+    // Bash(tfy*) counts as omnibus → toxic flow
+    expect(findings.some((f) => f.rule === "security.toxic_flow")).toBe(true);
+  });
+
+  test("classifies Bash(pattern) as omnibus", () => {
+    const skill = makeSkill(["Bash(tfy*)"]);
+    const findings = checkSecurityStructural(skill);
+    expect(findings.some((f) => f.rule === "security.toxic_flow")).toBe(true);
   });
 });
 

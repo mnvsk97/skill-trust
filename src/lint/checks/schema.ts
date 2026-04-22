@@ -65,18 +65,22 @@ export function checkSchema(skill: ParsedSkill): LintFinding[] {
     });
   }
 
-  // allowed-tools (optional, but must be array of strings if present)
+  // allowed-tools (optional — accepts array of strings or a single space-separated string)
   if (fm["allowed-tools"] !== undefined) {
     const at = fm["allowed-tools"];
-    if (
-      !Array.isArray(at) ||
-      at.some((t) => typeof t !== "string" || t.trim() === "")
-    ) {
+    const isStringFormat = typeof at === "string" && at.trim() !== "";
+    const isArrayFormat =
+      Array.isArray(at) &&
+      at.length > 0 &&
+      at.every((t) => typeof t === "string" && t.trim() !== "");
+
+    if (!isStringFormat && !isArrayFormat) {
       findings.push({
         rule: "schema.allowed_tools_type",
         severity: "error",
         message:
-          "`allowed-tools` must be an array of non-empty strings, e.g. [Read, Bash, mcp__myserver__my_tool].",
+          "`allowed-tools` must be an array of strings or a space-separated string, " +
+          'e.g. [Read, Bash] or "Bash(tfy*) Bash(curl *)".',
         file,
       });
     }
