@@ -39,7 +39,7 @@ function formatFinding(f: LintFinding): string {
 
 // ─── Pretty reporter ──────────────────────────────────────────────────────────
 
-export function reportPretty(result: LintResult): void {
+function reportPretty(result: LintResult): void {
   const { findings, skillRoot, passed } = result;
 
   if (findings.length === 0) {
@@ -82,7 +82,7 @@ export function reportPretty(result: LintResult): void {
 
 // ─── JSON reporter ────────────────────────────────────────────────────────────
 
-export function reportJson(result: LintResult): void {
+function reportJson(result: LintResult): void {
   console.log(JSON.stringify(result, null, 2));
 }
 
