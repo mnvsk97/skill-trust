@@ -1,6 +1,6 @@
 {
   "name": "@mnvsk97/skill-check",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Skill contract testing framework for the agentskills.io ecosystem",
   "license": "MIT",
   "type": "module",
