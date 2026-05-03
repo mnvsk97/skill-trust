@@ -26,6 +26,36 @@ npx @mnvsk97/skill-check lint ./my-skill
 
 The installed binary is still `skill-check`.
 
+## Claude Code plugin
+
+This repository also ships the official Claude Code plugin for `skill-check`. The plugin adds a `/skill-check` skill and a `skill-check` Bash wrapper so Claude can set up the CLI, lint skills, run assertion suites, record traces, and generate suite YAML files from inside Claude Code.
+
+Install it from this repo-hosted marketplace:
+
+```bash
+claude plugin marketplace add mnvsk97/skill-trust
+claude plugin install skill-check@skill-check
+```
+
+For local development or PR testing, install from a checkout instead:
+
+```bash
+claude plugin validate .
+claude plugin marketplace add .
+claude plugin install skill-check@skill-check
+```
+
+Restart Claude Code after installing the plugin, then run:
+
+```text
+/skill-check setup ./my-skill
+/skill-check lint ./my-skill
+/skill-check assert ./suite.yaml
+/skill-check record ./suite.yaml --assert
+```
+
+See [docs/claude-plugin.md](docs/claude-plugin.md) for marketplace layout, install scopes, setup behavior, and troubleshooting.
+
 ## Quick start
 
 ```bash

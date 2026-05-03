@@ -21,7 +21,7 @@ const program = new Command();
 program
   .name("skill-check")
   .description("Skill contract testing for the agentskills.io ecosystem")
-  .version("0.2.1");
+  .version("0.3.0");
 
 // ─── lint command ─────────────────────────────────────────────────────────────
 

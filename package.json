@@ -39,6 +39,9 @@
     "build": "tsc",
     "dev": "tsx src/cli.ts",
     "prepack": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "pack:dry-run": "npm pack --dry-run",
+    "launch:check": "npm run typecheck && npm test && npm run pack:dry-run",
     "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
   "dependencies": {

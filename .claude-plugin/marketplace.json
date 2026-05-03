@@ -1,0 +1,29 @@
+{
+  "name": "skill-check",
+  "owner": {
+    "name": "skill-check maintainers"
+  },
+  "metadata": {
+    "description": "Official Claude Code marketplace for the skill-check CLI and skill testing workflows."
+  },
+  "plugins": [
+    {
+      "name": "skill-check",
+      "source": "./plugins/skill-check",
+      "description": "Set up and run skill-check from Claude Code.",
+      "author": {
+        "name": "skill-check maintainers"
+      },
+      "repository": "https://github.com/mnvsk97/skill-trust",
+      "homepage": "https://github.com/mnvsk97/skill-trust#readme",
+      "license": "MIT",
+      "category": "testing",
+      "tags": [
+        "skills",
+        "testing",
+        "lint",
+        "claude-code"
+      ]
+    }
+  ]
+}

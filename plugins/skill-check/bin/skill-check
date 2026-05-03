@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ -f "./package.json" ] && [ -f "./dist/cli.js" ]; then
+  package_name="$(node -e 'try { console.log(JSON.parse(require("fs").readFileSync("package.json", "utf8")).name || "") } catch { process.exit(1) }')"
+  if [ "${package_name}" = "@mnvsk97/skill-check" ]; then
+    exec node ./dist/cli.js "$@"
+  fi
+fi
+
+if [ -x "./node_modules/.bin/skill-check" ]; then
+  exec ./node_modules/.bin/skill-check "$@"
+fi
+
+exec npx -y "${SKILL_CHECK_PACKAGE_SPEC:-@mnvsk97/skill-check@latest}" "$@"

@@ -7,6 +7,7 @@ The current CLI release ships the offline `lint` command. The assertion-suite an
 ## Navigation
 
 - [Getting started](../README.md) — install, quick start, overview
+- [Claude Code plugin](claude-plugin.md) — install the official plugin and run `/skill-check`
 - [CLI reference](cli.md)
 - [Lint rules](lint-rules.md)
 - [Assertion suite format](assertion-suite.md)
