@@ -22,6 +22,7 @@ Activate when the user mentions:
 - Finding or recommending safe skills from skills.sh
 - Linting a `SKILL.md` file
 - Running an LLM semantic security scan
+- Creating `skill-test.yaml` or other behavior-test YAML
 - Recording skill test runs
 - Validating traces against a suite YAML
 - Building or fixing skill assertion suites
@@ -121,6 +122,46 @@ npx @mnvsk97/skill-trust@latest lint <path>
 ```
 
 Interpret errors as blockers. Warnings are review prompts unless the user's policy treats warnings as failures.
+
+### Init and behavior YAML authoring
+
+Use when the user wants to create or improve the YAML file for behavior tests.
+
+Start by inspecting the skill repository before writing the suite:
+
+1. Locate the skill root by finding `SKILL.md`.
+2. Read the frontmatter for `name`, `description`, and `allowed-tools`.
+3. Read the skill body and referenced local files to identify the main workflow, activation language, expected tools, expected commands, files it should create or edit, and risky actions it must avoid.
+4. Inspect nearby examples, fixtures, README files, scripts, package files, and test data to understand realistic user tasks.
+5. If the repo has no fixture workspace, create a minimal fixture only when needed for the behavior being tested.
+
+Then generate the starter suite:
+
+```bash
+npx @mnvsk97/skill-trust@latest init --skill <skill-name>
+```
+
+After generation, replace generic placeholders with concrete tests:
+
+- `explicit_activation`: a direct prompt such as "Use the $<skill-name> skill...".
+- `implicit_activation`: a natural user request that should route to the skill without naming it.
+- `contextual_activation`: a realistic noisy request where repo context should still trigger the skill.
+- `negative_activation`: a nearby but different task that must not activate the skill.
+- `happy_path`: the main workflow with meaningful `steps`, `tools`, `commands`, file assertions, API assertions, and `outcome`.
+
+Prefer assertions that reflect observable behavior, not implementation guesses. Use `dangerous`, `forbidden_tools`, `should_not_run`, `should_not_activate`, and `should_not_create` for important safety boundaries. Keep live external side effects out of the first suite unless the user explicitly wants an integration test; prefer fixtures, dry-run commands, local files, or mocked endpoints.
+
+Before telling the user the YAML is ready, scan it for placeholders such as `replace-with-required-step`, vague prompts, missing fixture paths, and assertions that cannot be observed in traces.
+
+### Test
+
+Use when the user wants to run a behavior YAML suite.
+
+```bash
+npx @mnvsk97/skill-trust@latest test <suite.yaml>
+```
+
+Run Docker and auth preflights first when possible. Behavior tests need Docker and Claude auth.
 
 ### Assert
 

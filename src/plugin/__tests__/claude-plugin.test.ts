@@ -49,6 +49,8 @@ describe("Claude Code plugin", () => {
     expect(skill).toContain("skill-trust --version");
     expect(skill).toContain("skill-trust lint <skill-path>");
     expect(skill).toContain("### init");
+    expect(skill).toContain("Do a lightweight repository scan before writing or editing the suite");
+    expect(skill).toContain("replace-with-required-step");
     expect(skill).toContain("### test");
     expect(skill).toContain("### record");
     expect(skill).toContain("CLAUDE_CODE_OAUTH_TOKEN");

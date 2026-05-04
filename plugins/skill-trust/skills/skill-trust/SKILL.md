@@ -25,6 +25,7 @@ Activate when `$ARGUMENTS` is provided or when the user mentions:
 - Linting a `SKILL.md` file
 - Vetting, scoring, scanning, finding, or recommending skills
 - Creating `skill-test.yaml` with `skill-trust init`
+- Designing or improving behavior-test YAML from an existing skill repository
 - Running Docker-first behavior tests with `skill-trust test`
 - Validating traces against a suite YAML file
 - Recording skill test runs
@@ -113,18 +114,38 @@ Run static offline checks on a skill. No API key is required.
 
 ### init
 
-Create a starter behavior test suite.
+Create or improve a behavior test suite.
 
 **Usage:** `/skill-trust init [--skill name] [--output skill-test.yaml]`
 
-1. Determine the skill name from `$ARGUMENTS` or from a nearby `SKILL.md`.
-2. Run:
+Use this workflow both when the user asks to generate `skill-test.yaml` and when they ask for help designing the YAML. Do a lightweight repository scan before writing or editing the suite:
+
+1. Locate the skill root. Prefer a path from `$ARGUMENTS`; otherwise look for `SKILL.md` in the current directory or common skill directories such as `skill/`, `skills/*/`, `.claude/skills/*/`, and `.codex/skills/*/`.
+2. Read `SKILL.md` frontmatter for `name`, `description`, and `allowed-tools`.
+3. Read the skill body and referenced local files. Identify:
+   - activation phrases and nearby negative prompts
+   - the main happy-path workflow
+   - expected tools, shell commands, API calls, and file changes
+   - safety boundaries such as commands, tools, files, or skills that must not run
+4. Inspect nearby README files, examples, scripts, package files, fixtures, and existing tests to infer realistic user tasks.
+5. If the repository has no fixture workspace and the behavior needs one, create a minimal fixture directory with only the files needed for the test.
+6. Determine the skill name from `$ARGUMENTS` or the discovered `SKILL.md`.
+7. Run:
    ```bash
    skill-trust init --skill <skill-name>
    ```
    Preserve supported options such as `--output` and `--force`.
-3. Explain that the generated `skill-test.yaml` includes explicit activation, implicit activation, contextual activation, negative activation, and a happy-path test.
-4. Tell the user to edit prompts and assertions before running live behavior tests.
+8. Replace generic starter text with concrete tests:
+   - `explicit_activation`: direct `$<skill-name>` usage.
+   - `implicit_activation`: natural user intent that should activate the skill without naming it.
+   - `contextual_activation`: realistic noisy request that should activate based on repo context.
+   - `negative_activation`: adjacent task that must not activate this skill.
+   - `happy_path`: main workflow with meaningful `steps`, `tools`, `commands`, file assertions, API assertions, and `outcome`.
+9. Prefer observable assertions over guesses about internal implementation. Use `dangerous`, `forbidden_tools`, `should_not_run`, `should_not_activate`, and `should_not_create` for important safety boundaries.
+10. Keep live external side effects out of the first suite unless the user explicitly wants an integration test. Prefer fixtures, local files, dry-run commands, or mocked endpoints.
+11. Before finishing, check the YAML for placeholder values such as `replace-with-required-step`, vague prompts, missing fixture paths, and assertions that cannot appear in traces.
+
+Explain that the generated suite should cover explicit activation, implicit activation, contextual activation, negative activation, and a happy-path end-to-end test.
 
 ### test
 
