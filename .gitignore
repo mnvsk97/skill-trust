@@ -7,3 +7,9 @@ dist/
 coverage/
 .DS_Store
 *.log
+
+# Local agent/workflow files
+.codex/
+.env.symphony.example
+WORKFLOW.md
+scripts/start-symphony.sh
