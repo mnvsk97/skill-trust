@@ -29,6 +29,17 @@ function runChecks(test: TestCase, trace: Trace): AssertFinding[] {
   ];
 }
 
+export function assertTestTrace(test: TestCase, trace: Trace): TestResult {
+  const findings = runChecks(test, trace);
+  const hasErrors = findings.some((f) => f.severity === "error");
+
+  return {
+    test_id: test.id,
+    passed: !hasErrors,
+    findings,
+  };
+}
+
 export function assertSuite(
   suitePath: string,
   opts: AssertOptions = {},
@@ -75,14 +86,7 @@ export function assertSuite(
       continue;
     }
 
-    const findings = runChecks(test, trace);
-    const hasErrors = findings.some((f) => f.severity === "error");
-
-    results.push({
-      test_id: test.id,
-      passed: !hasErrors,
-      findings,
-    });
+    results.push(assertTestTrace(test, trace));
   }
 
   return {

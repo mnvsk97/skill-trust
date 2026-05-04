@@ -1,9 +1,9 @@
 # Architecture
 
-## Three-pillar design
+## Trust workflow design
 
 ```
-skill-check
+skill-trust
 ├── lint     ← offline, no API keys
 │   ├── schema check       (SKILL.md frontmatter)
 │   ├── description check  (quality of routing signals)
@@ -13,11 +13,20 @@ skill-check
 │       ├── static scan    (regex pattern library)
 │       └── structural     (tool capability graph)
 │
-├── scan     ← online, ANTHROPIC_API_KEY required
-│   ├── haiku classifier   (fast yes/no on injection risk)
-│   └── sonnet analyser    (deep semantic analysis)
+├── scan     ← online, OpenAI-compatible LLM endpoint
+│   └── semantic analyser  (hidden injection, tool poisoning, exfiltration)
 │
-└── assert   ← offline, validates pre-recorded traces
+├── vet/score ← trust verdicts
+│   ├── safety component
+│   ├── quality component
+│   └── provenance component
+│
+├── find/recommend ← skills.sh discovery
+│   ├── npx skills find adapter
+│   ├── install-count signal
+│   └── source-reputation signal
+│
+└── assert/record ← behavior checks
     ├── presence assertions   (hooks.required, files.created, ...)
     ├── absence assertions    (hooks.forbidden, commands.forbidden, ...)
     ├── ordering assertions   (hooks.order, skills.order)
@@ -27,19 +36,17 @@ skill-check
 
 ## Current CLI scope
 
-- **`lint`** command — implemented and shipped in the CLI
-
-## Planned next phases
-
-- **`assert`** command — trace validation against YAML suites
-- **`record`** command — single target agent, local process (no Docker)
-- **`scan`** command — LLM security analysis
+- **`lint`** — offline static checks
+- **`scan`** — LLM semantic security analysis
+- **`vet` / `score`** — trust review and JSON scorecard
+- **`find` / `recommend`** — discovery and metadata ranking over skills.sh results
+- **`assert`** — trace validation against YAML suites
+- **`record`** — Docker-based trace capture
 
 ## Later scope
 
 - **Tester agent** — second Claude agent that simulates a user, drives multi-turn conversations with the target
-- **Docker isolation** — each test case runs in its own container
-- **Bedrock provider support** — `ANTHROPIC_API_KEY` → `AWS_*` credentials
+- **Provider presets** — common LLM endpoint defaults while preserving OpenAI-compatible config
 - **Eval mode** — `eval_runs` + `min_pass_rate` for flaky skill testing
 
 ## Trace capture
@@ -48,7 +55,7 @@ When running `record`, the orchestrator wraps the target agent session with capt
 
 ```
 ┌─────────────────────────────────────┐
-│  Orchestrator (skill-check record)  │
+│  Orchestrator (skill-trust record)  │
 │                                     │
 │  ┌─────────────┐   ┌─────────────┐  │
 │  │   Tester    │   │   Target    │  │
@@ -102,6 +109,9 @@ filter by min_confidence
 
 **Why separate `lint` and `scan`?**  
 `lint` must work offline in air-gapped CI environments with no API keys. LLM-powered checks would break that promise. Keeping them separate lets teams run `lint` always and `scan` only when they have credentials.
+
+**Why does `lint` include text checks?**  
+The text checks are deterministic static signatures, not semantic judgement. Known injection phrases, suspicious outbound data transfer, and hardcoded token patterns belong in `lint` because they are cheap and repeatable.
 
 **Why is `skill.activated` advisory?**  
 Activation is inferred from file-read events, which produces false positives (agent reads SKILL.md for reference without activating it) and false negatives (some runtimes don't expose file-read telemetry). Use `hooks.required` as the primary behavioral gate.

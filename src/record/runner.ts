@@ -18,10 +18,11 @@ export async function runTest(
   suite: Suite,
   suiteDir: string,
   image: string,
-  opts: { outputDir?: string },
+  opts: { outputDir?: string; runIndex?: number; env?: Record<string, string> },
 ): Promise<RecordingResult> {
   const startTime = Date.now();
-  const runId = `run-${test.id}-${Date.now()}`;
+  const runIndex = opts.runIndex ?? 1;
+  const runId = `run-${test.id}-${runIndex}-${Date.now()}`;
 
   try {
     // 1. Resolve fixture
@@ -29,7 +30,7 @@ export async function runTest(
 
     // 2. Copy fixture to a temp directory
     const tmpDir = fs.mkdtempSync(
-      path.join(fs.realpathSync(process.env.TMPDIR ?? "/tmp"), `skill-check-ws-`),
+      path.join(fs.realpathSync(process.env.TMPDIR ?? "/tmp"), `skill-trust-ws-`),
     );
     if (fixtureDir) {
       fs.cpSync(fixtureDir, tmpDir, { recursive: true });
@@ -47,9 +48,12 @@ export async function runTest(
     const timeoutMs = test.timeout_ms ?? suite.defaults?.timeout_ms ?? 120_000;
 
     // 6. Build env vars
-    const env: Record<string, string> = {};
-    if (process.env.ANTHROPIC_API_KEY) {
+    const env: Record<string, string> = { ...(opts.env ?? {}) };
+    if (!env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY) {
       env.ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+    }
+    if (!env.CLAUDE_CODE_OAUTH_TOKEN && process.env.CLAUDE_CODE_OAUTH_TOKEN) {
+      env.CLAUDE_CODE_OAUTH_TOKEN = process.env.CLAUDE_CODE_OAUTH_TOKEN;
     }
 
     // 7. Run in container
@@ -71,7 +75,8 @@ export async function runTest(
     // 9. Write trace to output directory
     const outputDir = opts.outputDir ?? path.join(suiteDir, "traces");
     fs.mkdirSync(outputDir, { recursive: true });
-    const tracePath = path.join(outputDir, `${test.id}.trace.json`);
+    const traceName = runIndex === 1 ? `${test.id}.trace.json` : `${test.id}.${runIndex}.trace.json`;
+    const tracePath = path.join(outputDir, traceName);
     fs.writeFileSync(tracePath, JSON.stringify(trace, null, 2), "utf8");
 
     // 10. Clean up temp workspace
@@ -81,6 +86,7 @@ export async function runTest(
 
     return {
       test_id: test.id,
+      run_index: runIndex,
       tracePath,
       success: result.exitCode === 0,
       error: result.exitCode !== 0 ? `Container exited with code ${result.exitCode}` : undefined,
@@ -90,6 +96,7 @@ export async function runTest(
     const durationMs = Date.now() - startTime;
     return {
       test_id: test.id,
+      run_index: runIndex,
       tracePath: "",
       success: false,
       error: (err as Error).message,

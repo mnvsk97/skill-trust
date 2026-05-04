@@ -6,7 +6,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
-const DEFAULT_IMAGE = "skill-check-runner:latest";
+const DEFAULT_IMAGE = "skill-trust-runner:latest";
 
 const DOCKERFILE_CONTENT = `FROM node:22-slim
 RUN npm install -g @anthropic-ai/claude-code@latest
@@ -42,6 +42,28 @@ function exec(
   });
 }
 
+export async function checkDockerAvailable(): Promise<{ ok: true } | { ok: false; message: string }> {
+  const version = await exec("docker", ["--version"], { timeout: 10_000 });
+  if (version.exitCode !== 0) {
+    return {
+      ok: false,
+      message:
+        "Docker is required for behavior tests but was not found. Install Docker Desktop and try again.",
+    };
+  }
+
+  const info = await exec("docker", ["info"], { timeout: 10_000 });
+  if (info.exitCode !== 0) {
+    return {
+      ok: false,
+      message:
+        "Docker is installed but not running. Start Docker Desktop and try again.",
+    };
+  }
+
+  return { ok: true };
+}
+
 /**
  * Ensure the Docker image exists locally. If not, build it from an inline Dockerfile.
  *
@@ -57,7 +79,7 @@ export async function ensureImage(opts?: { image?: string }): Promise<string> {
   }
 
   // Build from inline Dockerfile
-  const tmpDir = fs.mkdtempSync(path.join(fs.realpathSync(process.env.TMPDIR ?? "/tmp"), "skill-check-docker-"));
+  const tmpDir = fs.mkdtempSync(path.join(fs.realpathSync(process.env.TMPDIR ?? "/tmp"), "skill-trust-docker-"));
   const dockerfilePath = path.join(tmpDir, "Dockerfile");
   fs.writeFileSync(dockerfilePath, DOCKERFILE_CONTENT, "utf8");
 
@@ -93,7 +115,7 @@ export async function runInContainer(config: {
 }): Promise<{ stdout: string; stderr: string; exitCode: number; traceLines: string[] }> {
   // Create a temp directory for settings and trace output
   const tmpDir = fs.mkdtempSync(
-    path.join(fs.realpathSync(process.env.TMPDIR ?? "/tmp"), "skill-check-run-"),
+    path.join(fs.realpathSync(process.env.TMPDIR ?? "/tmp"), "skill-trust-run-"),
   );
   const settingsDir = path.join(tmpDir, ".claude");
   fs.mkdirSync(settingsDir, { recursive: true });

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://skill-check.dev/schemas/trace/v0.1.json",
-  "title": "skill-check normalized trace",
+  "$id": "https://skill-trust.dev/schemas/trace/v0.1.json",
+  "title": "skill-trust normalized trace",
   "description": "Canonical format for recording agent skill execution traces. All adapters (native, shim, parser, manual) produce this shape.",
   "type": "object",
   "required": ["version", "run_id", "events"],

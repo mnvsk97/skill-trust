@@ -5,7 +5,7 @@ Each family owns a distinct concern; mixing concerns across families is a schema
 
 ## `lifecycle.*` — Harness/runner events
 
-Events emitted by the skill-check runner itself, not by the agent or skill.
+Events emitted by the skill-trust runner itself, not by the agent or skill.
 
 | Type | Meaning |
 |---|---|

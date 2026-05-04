@@ -1,12 +1,13 @@
-# skill-check docs
+# skill-trust docs
 
-> Skill contract testing for the agentskills.io ecosystem
+> Trust checks and recommendations for the skills.sh agent-skill ecosystem
 
-The current CLI release ships the offline `lint` command. The assertion-suite and trace docs below describe the planned behavioral-testing surface that is not yet implemented in the CLI.
+The current CLI supports offline linting, semantic scanning with OpenAI-compatible APIs, trust verdicts, skills.sh discovery/recommendations, Docker-first behavior tests, trace assertions, and Docker-backed recording.
 
 ## Navigation
 
 - [Getting started](../README.md) — install, quick start, overview
+- [Launch checklist](launch.md)
 - [CLI reference](cli.md)
 - [Lint rules](lint-rules.md)
 - [Assertion suite format](assertion-suite.md)

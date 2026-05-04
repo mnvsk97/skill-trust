@@ -10,7 +10,8 @@ import chalk from "chalk";
 import type { RecordResult, RecordingResult } from "../types.js";
 import { loadSuite } from "../shared/parse-suite.js";
 import { assertSuite, reportAssert } from "../assert/index.js";
-import { ensureImage } from "./docker.js";
+import { getClaudeAuthStatus } from "../auth/claude.js";
+import { checkDockerAvailable, ensureImage } from "./docker.js";
 import { runTest } from "./runner.js";
 
 export interface RecordOptions {
@@ -30,12 +31,14 @@ export async function recordSuite(
   const suite = loadSuite(suitePath);
   const suiteDir = path.dirname(suitePath);
 
-  // Require ANTHROPIC_API_KEY
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error(
-      "ANTHROPIC_API_KEY environment variable is required for recording. " +
-      "Set it before running skill-check record.",
-    );
+  const docker = await checkDockerAvailable();
+  if (!docker.ok) {
+    throw new Error(docker.message);
+  }
+
+  const auth = getClaudeAuthStatus();
+  if (!auth.ok) {
+    throw new Error(auth.message);
   }
 
   // Ensure Docker image is available
@@ -57,6 +60,7 @@ export async function recordSuite(
   for (const test of tests) {
     const result = await runTest(test, suite, suiteDir, image, {
       outputDir: opts?.outputDir,
+      env: auth.env,
     });
     recordings.push(result);
   }

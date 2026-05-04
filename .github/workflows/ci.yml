@@ -25,13 +25,13 @@ jobs:
         run: npm ci
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Run tests
         run: npm test
 
       - name: Verify package tarball
-        run: npm pack --dry-run
+        run: npm run pack:dry-run
 
   lint-example:
     name: Lint example skill
@@ -53,6 +53,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: skill-check lint (cloud-deploy example)
+      - name: skill-trust lint (cloud-deploy example)
         run: node dist/cli.js lint examples/cloud-deploy --format json
         # This example is expected to pass lint — it's our golden reference

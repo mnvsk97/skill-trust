@@ -1,7 +1,7 @@
 ---
-name: skill-check
-description: Test and validate AI agent skills — lint SKILL.md files, validate execution traces against spec files, record test runs in Docker, and build spec YAML files
-version: 0.2.1
+name: skill-trust
+description: Vet, scan, score, find, recommend, lint, record, and assert AI agent skills using the @mnvsk97/skill-trust CLI
+version: 0.3.0
 allowed-tools:
   - Read
   - Bash
@@ -10,208 +10,148 @@ allowed-tools:
   - Grep
 ---
 
-# skill-check
+# skill-trust
 
-Run skill-check commands to test and validate AI agent skills. This skill is the Claude Code interface for the `@mnvsk97/skill-check` CLI.
+Use the `@mnvsk97/skill-trust` CLI when a user wants to decide whether an AI agent skill is safe, good, worth installing, or behaving according to a contract.
 
 ## When to activate
 
-Activate when `$ARGUMENTS` is provided or when the user mentions:
+Activate when the user mentions:
 
-- Linting a SKILL.md file
-- Validating traces against a spec/suite YAML
+- Vetting, trusting, scoring, or reviewing a skill
+- Finding or recommending safe skills from skills.sh
+- Linting a `SKILL.md` file
+- Running an LLM semantic security scan
 - Recording skill test runs
-- Building or generating a spec YAML file
-- Testing agent skills or skill contracts
+- Validating traces against a suite YAML
+- Building or fixing skill assertion suites
 
-Do NOT activate for general coding tasks unrelated to skill testing.
+Do not activate for general coding work unrelated to agent skills.
 
-## Argument parsing
+## Commands
 
-Parse `$ARGUMENTS` to determine which workflow to run:
+Prefer `npx @mnvsk97/skill-trust@latest ...` unless the repo already has a local checkout and the user is working inside it.
 
-- Starts with `lint` -> run the **lint** workflow
-- Starts with `assert` -> run the **assert** workflow
-- Starts with `record` -> run the **record** workflow
-- Starts with `build-spec` -> run the **build-spec** workflow
-- Empty or `help` -> show a summary of available commands
+### Find
 
-If the argument does not match any workflow, tell the user the available commands: `lint`, `assert`, `record`, `build-spec`.
+Use when the user asks what skills exist.
 
----
-
-## Workflows
-
-### lint
-
-Runs static offline checks on a SKILL.md file. No API key required.
-
-**Usage:** `/skill-check lint [path]`
-
-1. Determine the target path from `$ARGUMENTS`. If only `lint` is provided with no path, ask the user for the skill directory or SKILL.md path. If there is a SKILL.md in the current working directory, offer to use that.
-2. Run the command:
-   ```
-   npx @mnvsk97/skill-check lint <path>
-   ```
-3. Interpret the output:
-   - If it exits 0: all checks passed. Summarize the result.
-   - If it exits 1: there are findings. Read the output and explain each finding to the user, grouped by severity (errors first, then warnings). Suggest specific fixes for each issue.
-4. Common findings and fixes:
-   - `schema.missing_name` — add a `name` field to frontmatter (must be a lowercase slug with hyphens/underscores)
-   - `schema.missing_desc` — add a `description` field to frontmatter
-   - `schema.allowed_tools_type` — ensure `allowed-tools` is a YAML array of strings
-   - `schema.invalid_version` — use semver format like `1.0.0`
-   - Security findings — review the flagged patterns and explain the risk
-
-**Error handling:** If `npx` fails with a module-not-found error, suggest running `npm install -g @mnvsk97/skill-check` or checking the Node.js version (requires Node 22+).
-
----
-
-### assert
-
-Validates pre-recorded execution traces against a spec YAML file. No API key required.
-
-**Usage:** `/skill-check assert <suite.yaml>`
-
-1. Determine the suite file path from `$ARGUMENTS`. If only `assert` is provided, ask the user for the path to their suite YAML file.
-2. Optionally, read the suite YAML file first using the Read tool to understand what tests it contains and what traces it references.
-3. Run the command:
-   ```
-   npx @mnvsk97/skill-check assert <suite.yaml>
-   ```
-4. Interpret the output:
-   - If it exits 0: all assertions passed. Summarize which tests passed.
-   - If it exits 1: some assertions failed. For each failed test, explain:
-     - Which assertions failed (steps out of order, missing commands, wrong outcome, etc.)
-     - What the expected value was vs. what was found in the trace
-     - Suggestions for fixing either the spec or the skill behavior
-
-**Assertion types to explain:**
-- `steps` — required workflow steps that must appear in order (subsequence match)
-- `commands` / `dangerous` — shell commands that must or must not appear
-- `tools` / `forbidden_tools` — tools that must or must not be invoked
-- `creates` / `modifies` / `deletes` — file operations expected in the trace
-- `outcome` — hard gate on pass/fail/error/timeout
-- `outcome_contains` / `outcome_not_contains` — soft checks on outcome text
-- `should_activate` / `should_not_activate` — skill routing assertions
-- `discovers` — skills that must be found after install
-
-**Error handling:** If the suite YAML fails to parse, check YAML syntax. If trace files are missing, tell the user they need to run `record` first or provide trace file paths.
-
----
-
-### record
-
-Runs skills inside Docker, captures execution traces via Claude Code hooks. Requires Docker and an Anthropic API key.
-
-**Usage:** `/skill-check record <suite.yaml>`
-
-1. Determine the suite file path from `$ARGUMENTS`. If only `record` is provided, ask for the suite YAML path.
-2. **Pre-flight checks** (run these before attempting the record):
-
-   a. Check Docker is available:
-   ```
-   docker info > /dev/null 2>&1
-   ```
-   If this fails, tell the user: "Docker is not running or not installed. The record command runs skills inside a Docker container to isolate execution. Please start Docker Desktop or install Docker, then try again."
-
-   b. Check for the API key:
-   ```
-   echo "${ANTHROPIC_API_KEY:+set}"
-   ```
-   If the variable is not set, tell the user: "ANTHROPIC_API_KEY is not set. The record command needs this to drive the Claude Code agent inside the container. Export it with: export ANTHROPIC_API_KEY=sk-ant-..."
-
-3. If pre-flight checks pass, run:
-   ```
-   npx @mnvsk97/skill-check record <suite.yaml>
-   ```
-   This may take a while depending on test timeouts. Let the user know it is running.
-
-4. Interpret the output:
-   - Report which tests recorded successfully and which failed
-   - Note the location of generated trace files
-   - If `--assert` was included, also interpret the assertion results
-
-**Options to mention if relevant:**
-- `--test <id>` — run only a specific test
-- `--assert` — automatically run assertions after recording
-- `--image <image>` — use a custom Docker image
-- `-o <dir>` — write traces to a specific output directory
-
-**Error handling:**
-- Docker permission errors: suggest `sudo` or adding user to the docker group
-- Timeout failures: suggest increasing `timeout_ms` in the suite YAML
-- API errors: check that the API key is valid and has sufficient quota
-
----
-
-### build-spec
-
-Guided workflow to generate a spec YAML file for testing a skill. This is interactive -- ask the user questions and build the file from their answers.
-
-**Usage:** `/skill-check build-spec`
-
-**Step 1: Gather information.** Ask the user these questions (skip any the user has already answered in their message):
-
-1. "What is the name of this test suite?" (used as the `suite` field)
-2. "Where is the skill source? (e.g., a GitHub repo like `github:org/repo` or a local path)"
-3. "What prompt should trigger this skill?" (the `prompt` field for the test)
-4. "What workflow steps does the skill run, in order?" (becomes the `steps` array)
-5. "Are there any shell commands the skill should execute?" (becomes the `commands` array)
-6. "Are there any dangerous commands it should never run?" (becomes the `dangerous` array)
-7. "Does the skill create, modify, or delete any files?" (becomes `creates`, `modifies`, `deletes`)
-8. "What is the expected outcome? (pass/fail)" (becomes the `outcome` field)
-9. "Do you need a workspace fixture? If so, what directory should be copied as the test workspace?"
-
-**Step 2: Generate the YAML.** Build the suite YAML following this structure:
-
-```yaml
-version: "0.1"
-suite: "<suite-name>"
-
-defaults:
-  agent: "claude-code"
-  model: "claude-sonnet-4-5"
-  timeout_ms: 60000
-
-skills:
-  under_test:
-    source: "<source>"
-
-fixtures:
-  - id: "<fixture-id>"
-    path: "<fixture-path>"
-
-tests:
-  - id: "<test-id>"
-    kind: "end_to_end"
-    prompt: "<prompt>"
-    workspace_fixture: "<fixture-id>"
-    should_activate:
-      - "<skill-name>"
-    steps:
-      - "<step-1>"
-      - "<step-2>"
-    commands:
-      - "<cmd>"
-    dangerous:
-      - "<dangerous-cmd>"
-    creates:
-      - "<file>"
-    outcome: "pass"
+```bash
+npx @mnvsk97/skill-trust@latest find "<query>"
 ```
 
-Only include fields the user provided values for. Omit empty arrays and unused sections.
+This searches skills.sh through `npx skills find` and prints candidates with install commands.
 
-**Step 3: Write the file.** Ask the user where to save it (suggest `suite.yaml` in the current directory). Use the Write tool to create the file.
+### Recommend
 
-**Step 4: Validate.** After writing, if there is a SKILL.md nearby, offer to run `lint` on it. Explain that the spec file itself is validated when running `assert` or `record`.
+Use when the user asks which skill they should use.
 
----
+```bash
+npx @mnvsk97/skill-trust@latest recommend "<query>"
+```
 
-## General error handling
+Default recommendations are metadata-based: install count plus source reputation. Use `--vet` to fetch and inspect the top candidates before ranking, or `--scan` to include LLM semantic review.
 
-- **npx not found:** The user needs Node.js 22+ installed. Suggest installing via nvm: `nvm install 22 && nvm use 22`.
-- **Package not found:** The package is `@mnvsk97/skill-check`. If npx cannot resolve it, suggest `npx @mnvsk97/skill-check@latest` to force the latest version.
-- **Permission errors:** Suggest using `npx` (which avoids global installs) or checking directory permissions.
-- **YAML parse errors:** Read the file with the Read tool and help the user fix syntax issues (indentation, missing quotes, etc.).
+```bash
+npx @mnvsk97/skill-trust@latest recommend "<query>" --vet
+npx @mnvsk97/skill-trust@latest recommend "<query>" --scan --limit 3
+```
+
+### Vet
+
+Use before installing a skill, or when the user asks whether a skill is safe.
+
+```bash
+npx @mnvsk97/skill-trust@latest vet <path-or-owner/repo@skill>
+```
+
+Examples:
+
+```bash
+npx @mnvsk97/skill-trust@latest vet ./my-skill
+npx @mnvsk97/skill-trust@latest vet vercel-labs/agent-skills@vercel-react-best-practices
+```
+
+Verdicts:
+
+- `recommended` means enabled checks found no hard blockers.
+- `review` means a human should inspect the reasons before installing.
+- `blocked` means the skill has an error-level or hard security finding.
+
+### Scan
+
+Use for deeper semantic review when static checks are not enough.
+
+```bash
+npx @mnvsk97/skill-trust@latest scan <path-or-owner/repo@skill>
+```
+
+Requires an OpenAI-compatible chat-completions endpoint:
+
+```bash
+export LLM_API_KEY=...
+export LLM_API_URL=https://api.openai.com/v1
+export LLM_MODEL=...
+```
+
+`OPENAI_API_KEY` and `OPENAI_BASE_URL` are accepted as fallbacks.
+
+Use `vet --scan` when the user wants one combined trust verdict:
+
+```bash
+npx @mnvsk97/skill-trust@latest vet <target> --scan
+```
+
+### Score
+
+Use for CI, dashboards, or machine-readable output.
+
+```bash
+npx @mnvsk97/skill-trust@latest score <target>
+```
+
+This always returns JSON.
+
+### Lint
+
+Use for fast local checks while authoring skills.
+
+```bash
+npx @mnvsk97/skill-trust@latest lint <path>
+```
+
+Interpret errors as blockers. Warnings are review prompts unless the user's policy treats warnings as failures.
+
+### Assert
+
+Use when a suite YAML and trace files already exist.
+
+```bash
+npx @mnvsk97/skill-trust@latest assert <suite.yaml>
+```
+
+If assertions fail, explain the expected behavior versus what the trace contained.
+
+### Record
+
+Use when the user wants to generate traces from live skill runs.
+
+```bash
+npx @mnvsk97/skill-trust@latest record <suite.yaml>
+```
+
+Requires Docker and `ANTHROPIC_API_KEY` for the current recorder.
+
+## Response guidance
+
+When presenting results, lead with the verdict:
+
+```text
+Recommended
+Review first
+Blocked
+```
+
+Then give short reasons: tool risk, lint errors, semantic scan findings, weak provenance, or strong official-source/install-count signals.
+
+Never describe a skill as safe based only on `find` or `recommend`; say it is a candidate and suggest `vet` for a file-level review.

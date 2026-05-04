@@ -5,7 +5,7 @@ import { lint } from "../index.js";
 
 describe("lint", () => {
   test("reports malformed YAML frontmatter as a parse error", () => {
-    const skillRoot = fs.mkdtempSync(path.join(os.tmpdir(), "skill-check-lint-"));
+    const skillRoot = fs.mkdtempSync(path.join(os.tmpdir(), "skill-trust-lint-"));
 
     fs.writeFileSync(
       path.join(skillRoot, "SKILL.md"),
