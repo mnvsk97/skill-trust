@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to skill-check are documented here.
+All notable changes to skill-trust are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [Semantic Versioning](https://semver.org/).
@@ -9,10 +9,23 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### In progress
-- `scan` command — LLM-powered semantic security analysis
-- `assert` command — trace validation against YAML assertion suites
-- `record` command — live skill execution trace capture
+No unreleased changes yet.
+
+---
+
+## [0.3.0] — 2026-05-03
+
+### Added
+- `scan` command for OpenAI-compatible LLM semantic security analysis.
+- `vet` command for local or GitHub skill trust reviews.
+- `score` command for machine-readable trust scorecards.
+- `find` command that normalizes `npx skills find` results.
+- `recommend` command that ranks skills.sh candidates by metadata signals.
+- Remote GitHub target support for `vet`, `score`, and `scan` using `<owner/repo@skill>`.
+
+### Changed
+- CLI version now reports `0.3.0`.
+- Documentation now positions skill-trust as a vetting/recommendation layer on top of skills.sh discovery.
 
 ---
 
@@ -21,7 +34,7 @@ Versions follow [Semantic Versioning](https://semver.org/).
 Initial release.
 
 ### Added
-- `skill-check lint` command — fully offline static checks
+- `skill-trust lint` command — fully offline static checks
   - `schema.*` — frontmatter validation (name, description, allowed-tools, version)
   - `desc.*` — description quality checks (length, body presence, H1 heading)
   - `files.*` — file reference validation (existence, no path traversal)

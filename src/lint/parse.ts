@@ -1,7 +1,7 @@
 /**
  * Parses a SKILL.md file into frontmatter + body.
  *
- * SKILL.md format (agentskills.io spec):
+ * SKILL.md format (agent skills spec):
  *   ---
  *   name: my-skill
  *   description: ...

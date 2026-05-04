@@ -23,6 +23,60 @@ export interface LintResult {
   passed: boolean;
 }
 
+// ─── Semantic scan result types ──────────────────────────────────────────────
+
+export interface ScanResult {
+  /** Original target passed by the user */
+  target: string;
+  /** Absolute path to the skill root that was scanned */
+  skillRoot: string;
+  /** LLM model used for the scan */
+  model: string;
+  /** OpenAI-compatible endpoint used, with secrets omitted */
+  endpoint: string;
+  findings: LintFinding[];
+  summary: string;
+  passed: boolean;
+}
+
+// ─── Trust score / recommendation types ──────────────────────────────────────
+
+export type TrustVerdict = "recommended" | "review" | "blocked";
+
+export interface ScoreComponent {
+  name: "safety" | "quality" | "provenance" | "popularity" | "relevance";
+  score: number;
+  max: number;
+  reasons: string[];
+}
+
+export interface TrustReview {
+  target: string;
+  skillRoot?: string;
+  score: number;
+  verdict: TrustVerdict;
+  summary: string;
+  components: ScoreComponent[];
+  lint?: LintResult;
+  scan?: ScanResult;
+}
+
+export interface SkillCandidate {
+  package: string;
+  source: string;
+  skill: string;
+  installs: number;
+  installText: string;
+  url?: string;
+}
+
+export interface CandidateRecommendation {
+  candidate: SkillCandidate;
+  score: number;
+  verdict: TrustVerdict;
+  reasons: string[];
+}
+
 // ─── SKILL.md frontmatter types ───────────────────────────────────────────────
 
 export interface SkillFrontmatter {
@@ -83,6 +137,9 @@ export interface Trace {
 export interface SpecDefaults {
   agent?: string;
   model?: string;
+  runtime?: "claude-code" | "claude-agent-sdk" | string;
+  isolation?: "docker" | string;
+  parallelism?: number | "auto" | string;
   timeout_ms?: number;
   max_turns?: number;
   max_budget_usd?: number;
@@ -113,6 +170,11 @@ export interface TestCase {
   max_budget_usd?: number;
   min_pass_rate?: number;
   tester?: { persona?: string; model?: string };
+  rubric?: {
+    threshold?: number;
+    checks?: Array<{ id: string; description: string }>;
+    [key: string]: unknown;
+  };
 
   should_activate?: string[];
   should_not_activate?: string[];
@@ -166,6 +228,22 @@ export interface TestResult {
   findings: AssertFinding[];
 }
 
+export interface TestRunResult extends TestResult {
+  run_index: number;
+  tracePath: string;
+  recording_success: boolean;
+  recording_error?: string;
+  duration_ms: number;
+}
+
+export interface AggregatedTestResult {
+  test_id: string;
+  passed: boolean;
+  pass_rate: number;
+  required_pass_rate: number;
+  runs: TestRunResult[];
+}
+
 export interface AssertResult {
   suitePath: string;
   suiteName: string;
@@ -177,6 +255,7 @@ export interface AssertResult {
 
 export interface RecordingResult {
   test_id: string;
+  run_index?: number;
   tracePath: string;
   success: boolean;
   error?: string;
@@ -188,4 +267,15 @@ export interface RecordResult {
   suiteName: string;
   recordings: RecordingResult[];
   assertResult?: AssertResult;
+}
+
+export interface BehaviorTestResult {
+  suitePath: string;
+  suiteName: string;
+  runId: string;
+  outputDir: string;
+  parallelism: number;
+  results: AggregatedTestResult[];
+  recordings: RecordingResult[];
+  passed: boolean;
 }

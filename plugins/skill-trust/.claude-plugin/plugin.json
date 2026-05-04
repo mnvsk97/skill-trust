@@ -1,15 +1,15 @@
 {
-  "name": "skill-check",
+  "name": "skill-trust",
   "version": "0.3.0",
-  "description": "Set up and run the skill-check CLI for AI agent skill linting, trace assertions, recordings, and suite generation.",
+  "description": "Set up and run the skill-trust CLI for AI agent skill linting, trace assertions, recordings, and suite generation.",
   "author": {
-    "name": "skill-check maintainers"
+    "name": "skill-trust maintainers"
   },
   "homepage": "https://github.com/mnvsk97/skill-trust#readme",
   "repository": "https://github.com/mnvsk97/skill-trust",
   "license": "MIT",
   "keywords": [
-    "skill-check",
+    "skill-trust",
     "skills",
     "testing",
     "lint",

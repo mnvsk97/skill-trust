@@ -5,7 +5,7 @@ import { lint } from "../index.js";
 
 describe("checkFiles", () => {
   test("errors when a referenced path escapes to a sibling directory", () => {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "skill-check-files-"));
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "skill-trust-files-"));
     const skillRoot = path.join(tempRoot, "skill");
     const siblingRoot = path.join(tempRoot, "skill-evil");
 

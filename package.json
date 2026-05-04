@@ -1,11 +1,11 @@
 {
-  "name": "@mnvsk97/skill-check",
+  "name": "@mnvsk97/skill-trust",
   "version": "0.3.0",
-  "description": "Skill contract testing framework for the agentskills.io ecosystem",
+  "description": "Trust checks and recommendations for the skills.sh agent-skill ecosystem",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "skill-check": "dist/cli.js"
+    "skill-trust": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -21,11 +21,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mnvsk97/skill-check.git"
+    "url": "git+https://github.com/mnvsk97/skill-trust.git"
   },
-  "homepage": "https://github.com/mnvsk97/skill-check#readme",
+  "homepage": "https://github.com/mnvsk97/skill-trust#readme",
   "bugs": {
-    "url": "https://github.com/mnvsk97/skill-check/issues"
+    "url": "https://github.com/mnvsk97/skill-trust/issues"
   },
   "keywords": [
     "agents",
@@ -38,10 +38,10 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/cli.ts",
-    "prepack": "npm run build",
     "typecheck": "tsc --noEmit",
     "pack:dry-run": "npm pack --dry-run",
     "launch:check": "npm run typecheck && npm test && npm run pack:dry-run",
+    "prepack": "npm run build",
     "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
   "dependencies": {

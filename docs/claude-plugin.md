@@ -1,15 +1,18 @@
 # Claude Code plugin
 
-The repository includes the official Claude Code plugin for `skill-check`. It is distributed through the repo-hosted marketplace at `.claude-plugin/marketplace.json` and the plugin source at `plugins/skill-check/`.
+The repository includes the official Claude Code plugin for `skill-trust`. It is distributed through the repo-hosted marketplace at `.claude-plugin/marketplace.json` and the plugin source at `plugins/skill-trust/`.
 
 ## What the plugin provides
 
-- `/skill-check setup` — verifies Node.js, checks the CLI wrapper, finds a skill path, and runs an initial lint.
-- `/skill-check lint [path]` — runs the offline linter and explains findings.
-- `/skill-check assert <suite.yaml>` — validates recorded traces against an assertion suite.
-- `/skill-check record <suite.yaml>` — runs the Docker-backed recording workflow and can assert afterward.
-- `/skill-check build-spec` — guides the user through creating a minimal assertion suite YAML file.
-- `skill-check` Bash wrapper — available while the plugin is enabled. It prefers a local `@mnvsk97/skill-check` repository build, then a project-local install, then `npx -y @mnvsk97/skill-check@latest`.
+- `/skill-trust setup` — verifies Node.js, checks the CLI wrapper, finds a skill path, and runs an initial lint.
+- `/skill-trust init` — creates a starter `skill-test.yaml`.
+- `/skill-trust test` — runs Docker-first scripted behavior tests.
+- `/skill-trust auth claude` — checks Claude auth for behavior tests.
+- `/skill-trust lint [path]` — runs the offline linter and explains findings.
+- `/skill-trust vet`, `/skill-trust score`, `/skill-trust scan` — reviews, scores, or semantically scans skills.
+- `/skill-trust assert <suite.yaml>` — validates recorded traces against an assertion suite.
+- `/skill-trust record <suite.yaml>` — runs the Docker-backed recording workflow and can assert afterward.
+- `skill-trust` Bash wrapper — available while the plugin is enabled. It prefers a local `@mnvsk97/skill-trust` repository build, then a project-local install, then `npx -y @mnvsk97/skill-trust@latest`.
 
 ## Install from GitHub
 
@@ -17,7 +20,7 @@ Add the marketplace, then install the plugin:
 
 ```bash
 claude plugin marketplace add mnvsk97/skill-trust
-claude plugin install skill-check@skill-check
+claude plugin install skill-trust@skill-trust
 ```
 
 Restart Claude Code after installation so the plugin skill and wrapper are loaded.
@@ -31,14 +34,14 @@ git clone https://github.com/mnvsk97/skill-trust.git
 cd skill-trust
 claude plugin validate .
 claude plugin marketplace add .
-claude plugin install skill-check@skill-check
+claude plugin install skill-trust@skill-trust
 ```
 
 If you already added the marketplace, refresh it before reinstalling or updating:
 
 ```bash
-claude plugin marketplace update skill-check
-claude plugin install skill-check@skill-check --scope local
+claude plugin marketplace update skill-trust
+claude plugin install skill-trust@skill-trust --scope local
 ```
 
 ## Usage
@@ -46,30 +49,33 @@ claude plugin install skill-check@skill-check --scope local
 Run the plugin skill from Claude Code:
 
 ```text
-/skill-check setup ./my-skill
-/skill-check lint ./my-skill
-/skill-check lint ./my-skill --format json
-/skill-check assert ./suite.yaml --trace ./trace.json
-/skill-check record ./suite.yaml --test happy_path --assert
-/skill-check build-spec
+/skill-trust setup ./my-skill
+/skill-trust init --skill my-skill
+/skill-trust auth claude
+/skill-trust test ./skill-test.yaml --run-in-band
+/skill-trust lint ./my-skill
+/skill-trust lint ./my-skill --format json
+/skill-trust vet ./my-skill
+/skill-trust assert ./suite.yaml --trace ./trace.json
+/skill-trust record ./suite.yaml --test happy_path --assert
 ```
 
-The setup workflow is intentionally conservative. It checks Node.js 22+, confirms the wrapper can run, locates the target `SKILL.md`, and runs `skill-check lint`. If you want persistent npm scripts, ask the plugin to add them after setup.
+The setup workflow is intentionally conservative. It checks Node.js 22+, confirms the wrapper can run, locates the target `SKILL.md`, and runs `skill-trust lint`. If you want persistent npm scripts, ask the plugin to add them after setup.
 
-By default, the wrapper falls back to `@mnvsk97/skill-check@latest` from npm. To test an unreleased CLI build, install it in the current project or set `SKILL_CHECK_PACKAGE_SPEC` before launching Claude Code:
+By default, the wrapper falls back to `@mnvsk97/skill-trust@latest` from npm. To test an unreleased CLI build, install it in the current project or set `SKILL_TRUST_PACKAGE_SPEC` before launching Claude Code:
 
 ```bash
-export SKILL_CHECK_PACKAGE_SPEC='github:mnvsk97/skill-trust'
+export SKILL_TRUST_PACKAGE_SPEC='github:mnvsk97/skill-trust'
 ```
 
 ## Cursor and Codex compatibility
 
-The `.claude-plugin/` marketplace and `/skill-check` command are Claude Code-specific. Cursor and Codex do not install or run Claude Code plugin manifests, so there is no extra Claude-plugin step for those environments.
+The `.claude-plugin/` marketplace and `/skill-trust` command are Claude Code-specific. Cursor and Codex do not install or run Claude Code plugin manifests, so there is no extra Claude-plugin step for those environments.
 
-Use the same `skill-check` CLI directly instead:
+Use the same `skill-trust` CLI directly instead:
 
 ```bash
-npx -y @mnvsk97/skill-check@latest lint ./my-skill
+npx -y @mnvsk97/skill-trust@latest lint ./my-skill
 ```
 
 For a persistent setup in Cursor, Codex, CI, or any other agent workflow, install the package in the project and add scripts such as:
@@ -77,8 +83,8 @@ For a persistent setup in Cursor, Codex, CI, or any other agent workflow, instal
 ```json
 {
   "scripts": {
-    "skill-check:lint": "skill-check lint ./my-skill",
-    "skill-check:lint:json": "skill-check lint ./my-skill --format json"
+    "skill-trust:lint": "skill-trust lint ./my-skill",
+    "skill-trust:lint:json": "skill-trust lint ./my-skill --format json"
   }
 }
 ```
@@ -92,17 +98,17 @@ If you are using Codex skills or Cursor rules, point those instructions at the C
 ├── .claude-plugin/
 │   └── marketplace.json
 └── plugins/
-    └── skill-check/
+    └── skill-trust/
         ├── .claude-plugin/
         │   └── plugin.json
         ├── bin/
-        │   └── skill-check
+        │   └── skill-trust
         └── skills/
-            └── skill-check/
+            └── skill-trust/
                 └── SKILL.md
 ```
 
-The marketplace entry points to `./plugins/skill-check`, so it works when the marketplace is added from a Git checkout or a GitHub repository. Do not add the raw `marketplace.json` URL when using this repo layout, because relative plugin sources need the full repository checkout.
+The marketplace entry points to `./plugins/skill-trust`, so it works when the marketplace is added from a Git checkout or a GitHub repository. Do not add the raw `marketplace.json` URL when using this repo layout, because relative plugin sources need the full repository checkout.
 
 ## Validation
 
@@ -118,8 +124,8 @@ If `claude plugin validate` is not available in your Claude Code version, run th
 
 ## Troubleshooting
 
-- **`/skill-check` does not appear:** restart Claude Code after installing the plugin and run `claude plugin list --available --json` to confirm the plugin is enabled.
-- **`skill-check` is not on `PATH`:** restart Claude Code, then retry. As a fallback, run `npx -y @mnvsk97/skill-check@latest <command>`.
-- **The wrapper resolves an older npm release:** install the desired CLI in the project or set `SKILL_CHECK_PACKAGE_SPEC` to the npm, GitHub, or file package source to run.
+- **`/skill-trust` does not appear:** restart Claude Code after installing the plugin and run `claude plugin list --available --json` to confirm the plugin is enabled.
+- **`skill-trust` is not on `PATH`:** restart Claude Code, then retry. As a fallback, run `npx -y @mnvsk97/skill-trust@latest <command>`.
+- **The wrapper resolves an older npm release:** install the desired CLI in the project or set `SKILL_TRUST_PACKAGE_SPEC` to the npm, GitHub, or file package source to run.
 - **Marketplace add fails:** verify `.claude-plugin/marketplace.json` exists and run `claude plugin validate .` from the repository root.
-- **Record fails before running tests:** start Docker and export `ANTHROPIC_API_KEY` before using `/skill-check record`.
+- **Behavior tests fail before running:** start Docker and set `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY`. For subscription auth, run `claude setup-token`.

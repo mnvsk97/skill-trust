@@ -18,7 +18,7 @@ The provided path does not exist or does not contain a `SKILL.md`.
 
 ## Schema rules — `schema.*`
 
-These check that the SKILL.md frontmatter satisfies the agentskills.io skill contract.
+These check that the SKILL.md frontmatter satisfies the agent skill contract.
 
 ### `schema.no_frontmatter` _(error)_
 SKILL.md has no YAML `---` block at all.

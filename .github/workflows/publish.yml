@@ -27,14 +27,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
-      - name: Run tests
-        run: npm test
-
-      - name: Verify package tarball
-        run: npm pack --dry-run
+      - name: Run launch checks
+        run: npm run launch:check
 
       - name: Verify tag matches package version
         if: startsWith(github.ref, 'refs/tags/v')

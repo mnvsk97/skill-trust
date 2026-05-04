@@ -7,7 +7,7 @@
   "ended_at": "2026-04-20T10:02:12.400Z",
   "duration_ms": 12400,
   "metadata": {
-    "ci_job": "skill-check-ci-42",
+    "ci_job": "skill-trust-ci-42",
     "git_sha": "abc1234"
   },
   "events": [

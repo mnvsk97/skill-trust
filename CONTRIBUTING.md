@@ -1,11 +1,11 @@
-# Contributing to skill-check
+# Contributing to skill-trust
 
-Thanks for your interest in contributing! skill-check is an open framework — contributions of new lint rules, security patterns, assertion types, and example suites are all welcome.
+Thanks for your interest in contributing! skill-trust is an open framework — contributions of new lint rules, security patterns, assertion types, and example suites are all welcome.
 
 ## Project structure
 
 ```
-skill-check/
+skill-trust/
 ├── src/
 │   ├── cli.ts                    # CLI entry point (commander)
 │   ├── types.ts                  # Shared TypeScript types
@@ -32,8 +32,8 @@ skill-check/
 ## Development setup
 
 ```bash
-git clone https://github.com/mnvsk97/skill-check
-cd skill-check
+git clone https://github.com/mnvsk97/skill-trust
+cd skill-trust
 npm install
 npm run build      # compile TypeScript
 npm test           # run jest tests

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://skill-check.dev/schemas/assertion/v0.1.json",
-  "title": "skill-check spec file",
+  "$id": "https://skill-trust.dev/schemas/assertion/v0.1.json",
+  "title": "skill-trust spec file",
   "description": "YAML spec file for validating skill behavior against recorded traces.",
   "type": "object",
   "required": ["version", "suite", "tests"],
@@ -32,6 +32,21 @@
         "model": {
           "type": "string",
           "description": "Default model (for record mode)."
+        },
+        "runtime": {
+          "type": "string",
+          "description": "Runtime adapter for behavior tests."
+        },
+        "isolation": {
+          "type": "string",
+          "description": "Isolation adapter for behavior tests."
+        },
+        "parallelism": {
+          "oneOf": [
+            { "type": "integer", "minimum": 1 },
+            { "type": "string" }
+          ],
+          "description": "Default behavior-test parallelism, such as auto or 4."
         },
         "timeout_ms": {
           "type": "integer",
@@ -201,6 +216,10 @@
           "$ref": "#/$defs/tester_config",
           "description": "Tester agent configuration."
         },
+        "rubric": {
+          "$ref": "#/$defs/rubric_config",
+          "description": "Optional future model-graded checks."
+        },
 
         "should_activate": {
           "type": "array",
@@ -301,6 +320,30 @@
           "type": "array",
           "items": { "type": "string" },
           "description": "Strings that should NOT appear in outcome data (soft check, warnings only)."
+        }
+      }
+    }
+    ,
+    "rubric_config": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "description"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
         }
       }
     }

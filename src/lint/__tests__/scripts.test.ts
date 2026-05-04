@@ -5,7 +5,7 @@ import { checkScripts } from "../checks/scripts.js";
 import type { ParsedSkill } from "../../types.js";
 
 function makeTempSkill(): { skill: ParsedSkill; cleanup: () => void } {
-  const skillRoot = fs.mkdtempSync(path.join(os.tmpdir(), "skill-check-"));
+  const skillRoot = fs.mkdtempSync(path.join(os.tmpdir(), "skill-trust-"));
   const skill: ParsedSkill = {
     skillMdPath: path.join(skillRoot, "SKILL.md"),
     skillRoot,

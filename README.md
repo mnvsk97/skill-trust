@@ -1,40 +1,43 @@
-# skill-check
+# skill-trust
 
-**Skill contract testing for the [agentskills.io](https://agentskills.io) ecosystem.**
+**Trust checks and recommendations for the [skills.sh](https://skills.sh) agent-skill ecosystem.**
 
-`skill-check` is an open testing framework for verifying that a skill works the way it claims.
+`skill-trust` helps teams decide which AI agent skills are safe and worth installing. It complements `npx skills`: the Skills CLI discovers and installs skills; `skill-trust` vets, scores, scans, and recommends them.
 
-Today, the published CLI ships the **offline lint** pillar. The broader framework is designed around three pillars:
+The CLI is organized around five workflows:
 
-| Pillar | Command | What it catches |
+| Workflow | Command | What it answers |
 |---|---|---|
-| **Lint** | `skill-check lint` | Schema violations, missing files, insecure patterns — _fully offline_ |
-| **Scan** | `skill-check scan` | Planned: LLM-powered semantic security analysis (prompt injection, tool poisoning) |
-| **Behavior** | `skill-check assert` | Planned: trace-based assertions for hooks, order, and outcomes |
+| **Behavior testing** | `skill-trust init`, `skill-trust test` | Does this skill activate and behave correctly in an isolated run? |
+| **Lint** | `skill-trust lint` | Does this skill have schema, quality, script, or static security problems? |
+| **Scan** | `skill-trust scan` | Does an LLM reviewer see semantic security risk? |
+| **Vet / Score** | `skill-trust vet`, `skill-trust score` | Is this skill recommended, review-first, or blocked? |
+| **Discovery** | `skill-trust find`, `skill-trust recommend` | Which candidate skills look worth considering? |
+| **Behavior internals** | `skill-trust record`, `skill-trust assert` | Did a recorded trace match its contract? |
 
-The repo already includes the draft trace/assertion specs and example suites for the planned `scan`, `assert`, and `record` commands, but those commands are not implemented in `0.1.0`.
+`lint`, `vet`, `score`, `find`, `recommend`, `assert`, and `record` run without an LLM key by default. `scan`, `vet --scan`, and `recommend --scan` use an OpenAI-compatible chat-completions endpoint.
 
 ---
 
 ## Install
 
 ```bash
-npm install -g @mnvsk97/skill-check
+npm install -g @mnvsk97/skill-trust
 # or run without installing:
-npx @mnvsk97/skill-check lint ./my-skill
+npx @mnvsk97/skill-trust lint ./my-skill
 ```
 
-The installed binary is still `skill-check`.
+The installed binary is still `skill-trust`.
 
 ## Claude Code plugin
 
-This repository also ships the official Claude Code plugin for `skill-check`. The plugin adds a `/skill-check` skill and a `skill-check` Bash wrapper so Claude can set up the CLI, lint skills, run assertion suites, record traces, and generate suite YAML files from inside Claude Code.
+This repository also ships the official Claude Code plugin for `skill-trust`. The plugin adds a `/skill-trust` skill and a `skill-trust` Bash wrapper so Claude can set up the CLI, lint/vet skills, initialize behavior suites, run Docker-first tests, run assertion suites, and record traces from inside Claude Code.
 
 Install it from this repo-hosted marketplace:
 
 ```bash
 claude plugin marketplace add mnvsk97/skill-trust
-claude plugin install skill-check@skill-check
+claude plugin install skill-trust@skill-trust
 ```
 
 For local development or PR testing, install from a checkout instead:
@@ -42,19 +45,22 @@ For local development or PR testing, install from a checkout instead:
 ```bash
 claude plugin validate .
 claude plugin marketplace add .
-claude plugin install skill-check@skill-check
+claude plugin install skill-trust@skill-trust
 ```
 
 Restart Claude Code after installing the plugin, then run:
 
 ```text
-/skill-check setup ./my-skill
-/skill-check lint ./my-skill
-/skill-check assert ./suite.yaml
-/skill-check record ./suite.yaml --assert
+/skill-trust setup ./my-skill
+/skill-trust init --skill my-skill
+/skill-trust test ./skill-test.yaml --run-in-band
+/skill-trust lint ./my-skill
+/skill-trust vet ./my-skill
+/skill-trust assert ./suite.yaml
+/skill-trust record ./suite.yaml --assert
 ```
 
-Cursor and Codex do not consume Claude Code plugin marketplaces, so there is no extra Claude-plugin setup for them. Use the same CLI directly in those tools instead, for example `npx -y @mnvsk97/skill-check@latest lint ./my-skill`, or install the package in the project and ask the agent to run `skill-check lint ./my-skill`.
+Cursor and Codex do not consume Claude Code plugin marketplaces, so there is no extra Claude-plugin setup for them. Use the same CLI directly in those tools instead, for example `npx -y @mnvsk97/skill-trust@latest lint ./my-skill`, or install the package in the project and ask the agent to run `skill-trust lint ./my-skill`.
 
 See [docs/claude-plugin.md](docs/claude-plugin.md) for marketplace layout, install scopes, setup behavior, and troubleshooting.
 
@@ -62,10 +68,21 @@ See [docs/claude-plugin.md](docs/claude-plugin.md) for marketplace layout, insta
 
 ```bash
 # Lint a skill directory (SKILL.md must be present)
-skill-check lint ./my-skill
+skill-trust lint ./my-skill
+
+# Create and run a Docker-first behavior test suite
+skill-trust init --skill my-skill
+skill-trust auth claude
+skill-trust test
+
+# Review a local skill and return a trust verdict
+skill-trust vet ./my-skill
+
+# Search skills.sh and rank candidates by metadata
+skill-trust recommend "React performance"
 
 # Lint with JSON output for CI
-skill-check lint ./my-skill --format json
+skill-trust lint ./my-skill --format json
 ```
 
 ### Example output
@@ -86,11 +103,14 @@ skill-check lint ./my-skill --format json
 
 Publishes are handled by GitHub Actions.
 
-1. Use Node 22+ locally (`nvm use 22`).
-2. Bump the version in `package.json` using `npm version patch|minor|major`.
-3. Push the commit and tag with `git push origin main --follow-tags`.
+1. Use Node 22 locally (`nvm install 22 && nvm use 22`).
+2. Run `npm run launch:check`.
+3. Bump the version in `package.json` using `npm version patch|minor|major`.
+4. Push the commit and tag with `git push origin main --follow-tags`.
 
 The publish workflow runs on `v*` tags, rebuilds the package, runs tests, verifies `npm pack --dry-run`, and then publishes to npm. The `NPM_TOKEN` repository secret must be configured in GitHub before the first release.
+
+See [docs/launch.md](docs/launch.md) for the full launch checklist.
 
 ## Commands
 
@@ -99,7 +119,7 @@ The publish workflow runs on `v*` tags, rebuilds the package, runs tests, verifi
 Runs static checks against a skill. No API keys required.
 
 ```
-skill-check lint [path] [options]
+skill-trust lint [path] [options]
 
 Arguments:
   path          Skill directory or SKILL.md path (defaults to cwd)
@@ -111,23 +131,101 @@ Options:
 
 **Exit code:** `0` = passed (errors only; warnings don't fail), `1` = one or more errors.
 
-### `scan [path]` _(planned)_
+### `scan [path]`
 
-LLM-powered security scan. Uses Claude to detect prompt injection, tool poisoning, and split-file attacks that static patterns miss. Requires `ANTHROPIC_API_KEY`.
+LLM-powered semantic security scan. Supports OpenAI-compatible APIs.
 
-### `assert <suite>` _(planned)_
+Required environment:
+
+```bash
+export LLM_API_KEY=...
+export LLM_API_URL=https://api.openai.com/v1
+export LLM_MODEL=...
+```
+
+Fallback aliases are supported for OpenAI users:
+
+```bash
+OPENAI_API_KEY -> LLM_API_KEY
+OPENAI_BASE_URL -> LLM_API_URL
+```
+
+### `vet <target>`
+
+Runs a trust review for a local path or GitHub skill target such as `vercel-labs/agent-skills@vercel-react-best-practices`.
+
+```
+skill-trust vet ./my-skill
+skill-trust vet vercel-labs/agent-skills@vercel-react-best-practices
+skill-trust vet ./my-skill --scan
+```
+
+Verdicts:
+
+- `recommended` — strong enough to install/use based on enabled checks
+- `review` — no hard block, but a human should inspect the reasons
+- `blocked` — error-level finding or hard security gate
+
+### `score <target>`
+
+Machine-readable version of `vet` for CI, dashboards, and registries.
+
+### `find <query>`
+
+Runs `npx skills find <query>` and normalizes the result into install commands and optional JSON.
+
+### `recommend <query>`
+
+Ranks search results by metadata signals: install count and source reputation.
+
+```
+skill-trust recommend "React performance"
+skill-trust recommend "React performance" --vet
+skill-trust recommend "React performance" --scan --limit 3
+```
+
+Default recommendations are metadata-only. `--vet` fetches and inspects the top candidates without installing them. `--scan` adds LLM semantic review.
+
+### `assert <suite>`
 
 Validates a trace file against a YAML assertion suite. Used in CI after recording a live run.
 
-### `record <suite>` _(planned)_
+### `init`
+
+Creates a starter `skill-test.yaml` with explicit activation, implicit activation, contextual activation, negative activation, and end-to-end happy-path tests.
+
+### `auth claude`
+
+Checks whether behavior tests can authenticate Claude. `CLAUDE_CODE_OAUTH_TOKEN` is used for subscription auth and `ANTHROPIC_API_KEY` is used for API auth.
+
+### `test [suite]`
+
+Runs scripted behavior tests in Docker, records traces, and asserts the generated traces in one flow. When no suite is provided, `skill-trust test` looks for `skill-test.yaml`.
+
+```
+skill-trust test
+skill-trust test --parallel 4
+skill-trust test --run-in-band
+skill-trust test --test deploy_happy_path
+```
+
+Default parallelism is `min(cpu count, 4)` locally and `2` in CI. `--run-in-band` is an alias for serial execution.
+
+### `record <suite>`
 
 Runs a skill against a real agent and captures a normalized trace. The trace can then be replayed with `assert`.
 
 ---
 
+## Why lint has text checks
+
+`lint` includes text checks because they are deterministic static signatures, like Semgrep rules: obvious prompt injection phrases, suspicious outbound `curl` patterns, and hardcoded secrets. They are cheap, offline, and CI-safe.
+
+`scan` is separate because it is slower, probabilistic, and requires an LLM endpoint. It is for semantic risks that static signatures miss, such as indirect exfiltration or split-file attacks.
+
 ## Lint rules
 
-Six rule families covering schema, description quality, file references, scripts, and security. See [docs/lint-rules.md](docs/lint-rules.md) for the full reference.
+Six rule families cover schema, description quality, file references, scripts, and security. See [docs/lint-rules.md](docs/lint-rules.md) for the full reference.
 
 | Family | What it checks |
 |---|---|

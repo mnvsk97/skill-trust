@@ -1,12 +1,12 @@
 # Security analysis
 
-skill-check has a multi-layer security analysis model:
+skill-trust has a multi-layer security analysis model:
 
 | Layer | Command | Needs API key? | What it catches |
 |---|---|---|---|
 | 1 — Static patterns | `lint` | No | Known injection phrases, credential literals, dangerous URLs |
 | 2 — Structural graph | `lint` | No | Toxic-flow trifecta, wildcard tool grants, cross-skill shadowing |
-| 3 — LLM semantic | `scan` _(V0.1)_ | Yes | Encoded injections, split-file attacks, semantic exfil patterns |
+| 3 — LLM semantic | `scan` | Yes | Encoded injections, split-file attacks, semantic exfil patterns |
 
 ---
 
@@ -74,12 +74,21 @@ Flagged as a warning when the MCP namespace doesn't match the skill's own name.
 
 ---
 
-## Layer 3: LLM semantic scan _(V0.1 — coming soon)_
+## Layer 3: LLM semantic scan
 
 Static patterns can be evaded by encoding, splitting across files, or using indirect language. Layer 3 uses a two-stage LLM pipeline:
 
-1. **Haiku classifier** — fast yes/no: "does this skill contain any text that could be used to override agent behaviour?"
-2. **Sonnet deep analysis** — if haiku flags it, sonnet performs a full semantic analysis and returns structured findings with evidence.
+1. Package skill files into a bounded review payload.
+2. Send the payload to an OpenAI-compatible chat-completions endpoint.
+3. Ask for structured findings with evidence.
+
+Configure it with:
+
+```bash
+export LLM_API_KEY=...
+export LLM_API_URL=https://api.openai.com/v1
+export LLM_MODEL=...
+```
 
 Patterns detected by LLM analysis but not static patterns:
 
@@ -92,7 +101,7 @@ Patterns detected by LLM analysis but not static patterns:
 
 ## Threat model
 
-skill-check models the following attacker scenarios:
+skill-trust models the following attacker scenarios:
 
 | Scenario | Description |
 |---|---|
@@ -102,8 +111,18 @@ skill-check models the following attacker scenarios:
 | **Split-file injection** | SKILL.md passes static checks but a referenced file contains injection content |
 | **Semantic manipulation** | Instructions that look harmless but cause the agent to leak information over time |
 
-skill-check does not currently model:
+skill-trust does not currently model:
 
 - Runtime sandbox escapes (OS-level)
 - Agent memory poisoning across sessions
 - Supply-chain attacks on `npm install` of the skill's dependencies
+
+## Trust verdicts
+
+`skill-trust vet` combines enabled safety checks into a simple verdict:
+
+| Verdict | Meaning |
+|---|---|
+| `recommended` | Strong score and no hard security gate. |
+| `review` | No hard block, but risk or weak provenance needs review. |
+| `blocked` | Error-level finding or high-confidence security issue. |
