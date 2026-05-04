@@ -62,6 +62,29 @@ By default, the wrapper falls back to `@mnvsk97/skill-check@latest` from npm. To
 export SKILL_CHECK_PACKAGE_SPEC='github:mnvsk97/skill-trust'
 ```
 
+## Cursor and Codex compatibility
+
+The `.claude-plugin/` marketplace and `/skill-check` command are Claude Code-specific. Cursor and Codex do not install or run Claude Code plugin manifests, so there is no extra Claude-plugin step for those environments.
+
+Use the same `skill-check` CLI directly instead:
+
+```bash
+npx -y @mnvsk97/skill-check@latest lint ./my-skill
+```
+
+For a persistent setup in Cursor, Codex, CI, or any other agent workflow, install the package in the project and add scripts such as:
+
+```json
+{
+  "scripts": {
+    "skill-check:lint": "skill-check lint ./my-skill",
+    "skill-check:lint:json": "skill-check lint ./my-skill --format json"
+  }
+}
+```
+
+If you are using Codex skills or Cursor rules, point those instructions at the CLI commands above. The Claude Code plugin is optional and only adds Claude Code-native command routing and a wrapper on Claude Code's plugin `PATH`.
+
 ## Marketplace layout
 
 ```text

@@ -15,6 +15,8 @@ allowed-tools:
 
 Use this plugin skill when a user wants to set up, run, or interpret `skill-check` for an AI agent skill. The plugin provides a `skill-check` executable on the Bash `PATH`; use that first. The wrapper prefers a local `@mnvsk97/skill-check` repository build at `dist/cli.js`, then a project-local `node_modules/.bin/skill-check`, and finally falls back to `npx -y @mnvsk97/skill-check@latest`.
 
+This Claude Code plugin is not installed by Cursor or Codex. If a user asks about those environments, explain that they should run the same CLI directly, such as `npx -y @mnvsk97/skill-check@latest lint ./my-skill`, or add project npm scripts that call `skill-check`.
+
 ## When to activate
 
 Activate when `$ARGUMENTS` is provided or when the user mentions:

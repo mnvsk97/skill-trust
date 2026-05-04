@@ -54,6 +54,8 @@ Restart Claude Code after installing the plugin, then run:
 /skill-check record ./suite.yaml --assert
 ```
 
+Cursor and Codex do not consume Claude Code plugin marketplaces, so there is no extra Claude-plugin setup for them. Use the same CLI directly in those tools instead, for example `npx -y @mnvsk97/skill-check@latest lint ./my-skill`, or install the package in the project and ask the agent to run `skill-check lint ./my-skill`.
+
 See [docs/claude-plugin.md](docs/claude-plugin.md) for marketplace layout, install scopes, setup behavior, and troubleshooting.
 
 ## Quick start
