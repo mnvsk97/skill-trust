@@ -7,6 +7,7 @@ The current CLI supports offline linting, semantic scanning with OpenAI-compatib
 ## Navigation
 
 - [Getting started](../README.md) — install, quick start, overview
+- [Claude Code plugin](claude-plugin.md) — install the official plugin and run `/skill-trust`
 - [Launch checklist](launch.md)
 - [CLI reference](cli.md)
 - [Lint rules](lint-rules.md)

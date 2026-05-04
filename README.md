@@ -29,6 +29,41 @@ npx @mnvsk97/skill-trust lint ./my-skill
 
 The installed binary is still `skill-trust`.
 
+## Claude Code plugin
+
+This repository also ships the official Claude Code plugin for `skill-trust`. The plugin adds a `/skill-trust` skill and a `skill-trust` Bash wrapper so Claude can set up the CLI, lint/vet skills, initialize behavior suites, run Docker-first tests, run assertion suites, and record traces from inside Claude Code.
+
+Install it from this repo-hosted marketplace:
+
+```bash
+claude plugin marketplace add mnvsk97/skill-trust
+claude plugin install skill-trust@skill-trust
+```
+
+For local development or PR testing, install from a checkout instead:
+
+```bash
+claude plugin validate .
+claude plugin marketplace add .
+claude plugin install skill-trust@skill-trust
+```
+
+Restart Claude Code after installing the plugin, then run:
+
+```text
+/skill-trust setup ./my-skill
+/skill-trust init --skill my-skill
+/skill-trust test ./skill-test.yaml --run-in-band
+/skill-trust lint ./my-skill
+/skill-trust vet ./my-skill
+/skill-trust assert ./suite.yaml
+/skill-trust record ./suite.yaml --assert
+```
+
+Cursor and Codex do not consume Claude Code plugin marketplaces, so there is no extra Claude-plugin setup for them. Use the same CLI directly in those tools instead, for example `npx -y @mnvsk97/skill-trust@latest lint ./my-skill`, or install the package in the project and ask the agent to run `skill-trust lint ./my-skill`.
+
+See [docs/claude-plugin.md](docs/claude-plugin.md) for marketplace layout, install scopes, setup behavior, and troubleshooting.
+
 ## Quick start
 
 ```bash
